@@ -34,6 +34,7 @@ private:
     SDL_Texture *texture;
     std::thread worker;
 
+    Uint32 ticks;
     bool isRunning;
     CPU cpu;
     Memory mem;

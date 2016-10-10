@@ -4,6 +4,8 @@
 
 #include "../include/Emulator.h"
 
+static const uint32_t idealFrameTime = ((1. / 60) * 1000) - 2;
+
 Emulator::Emulator(std::string filename) : cpu(), mem(), rom(filename), ppu(), controller(), isRunning(true) {
     SDL_Init(SDL_INIT_EVERYTHING);
     SDL_CreateWindowAndRenderer(SCREEN_WIDTH, SCREEN_HEIGHT, 0, &window, &renderer);
@@ -19,6 +21,10 @@ void Emulator::drawerFunc(int x, int y, int color) {
 }
 
 void Emulator::vertSyncHandler() {
+    Uint32 frametime = ticks - SDL_GetTicks();
+    if (frametime < idealFrameTime) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(idealFrameTime - frametime));
+    }
     texture = SDL_CreateTextureFromSurface(renderer, surface);
     SDL_RenderCopy(renderer, texture, NULL, NULL);
     SDL_DestroyTexture(texture);
@@ -39,6 +45,7 @@ void Emulator::emuThread() {
 
     // slow down this shit, dog
     while (isRunning) {
+        ticks = SDL_GetTicks();
         int cycles = cpu.execute();
         if (mem.addCyclesAfterDMA == 513) { // kostyl, for better synchronization
             cycles += mem.addCyclesAfterDMA;
@@ -65,14 +72,30 @@ int Emulator::run() {
             }
             if (event.type == SDL_KEYDOWN) {
                 if (event.key.repeat == 0) {
-                    states[0] = (event.key.keysym.sym == SDLK_z);
-                    states[1] = (event.key.keysym.sym == SDLK_x);
-                    states[2] = (event.key.keysym.sym == SDLK_SPACE);
-                    states[3] = (event.key.keysym.sym == SDLK_RETURN);
-                    states[4] = (event.key.keysym.sym == SDLK_UP);
-                    states[5] = (event.key.keysym.sym == SDLK_DOWN);
-                    states[6] = (event.key.keysym.sym == SDLK_LEFT);
-                    states[7] = (event.key.keysym.sym == SDLK_RIGHT);
+                    if (!states[0] && event.key.keysym.sym == SDLK_z) {
+                        states[0] = true;
+                    }
+                    if (!states[1] && event.key.keysym.sym == SDLK_x) {
+                        states[1] = true;
+                    }
+                    if (!states[2] && event.key.keysym.sym == SDLK_SPACE) {
+                        states[2] = true;
+                    }
+                    if (!states[3] && event.key.keysym.sym == SDLK_RETURN) {
+                        states[3] = true;
+                    }
+                    if (!states[4] && event.key.keysym.sym == SDLK_UP) {
+                        states[4] = true;
+                    }
+                    if (!states[5] && event.key.keysym.sym == SDLK_DOWN) {
+                        states[5] = true;
+                    }
+                    if (!states[6] && event.key.keysym.sym == SDLK_LEFT) {
+                        states[6] = true;
+                    }
+                    if (!states[7] && event.key.keysym.sym == SDLK_RIGHT) {
+                        states[7] = true;
+                    }
                     controller.setButtons(states);
                 }
             } else if (event.type == SDL_KEYUP) {

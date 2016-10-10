@@ -34,7 +34,7 @@ uint8_t Memory::Read8(uint16_t addr) {
     } else if (addr >= 0x2000 && addr <= 0x3FFF) {
         return ppu->Read((addr - 0x2000) % 8);
     } else if (addr >= 0x4000 && addr <= 0x4017) {
-        if (addr == 0x4016 || addr == 0x4017) {
+        if (addr == 0x4016) {
             return c->Read();
         }
     } else if (addr >= 0x4018 && addr <= 0x401F) {
