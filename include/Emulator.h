@@ -6,15 +6,12 @@
 #define NESEMULATOR_EMULATOR_H
 
 #include "Common.h"
-#include "CPU.h"
-#include "Memory.h"
-#include "Controller.h"
 #include <SDL2/SDL.h>
-#include <pthread.h>
+#include "Console.h"
 
 class Emulator {
 public:
-    Emulator(std::string filename);
+    Emulator(std::string _filename);
 
     void emuThread();
 
@@ -36,11 +33,7 @@ private:
 
     Uint32 ticks;
     bool isRunning;
-    CPU cpu;
-    Memory mem;
-    ROM rom;
-    PPU ppu;
-    Controller controller;
+    std::string filename;
 };
 
 

@@ -6,6 +6,9 @@
 #define NESEMULATOR_ROM_H
 
 #include "Common.h"
+#include "IMapper.h"
+#include "Mapper000.h"
+#include "Mapper004.h"
 
 #pragma pack(push, 1)
 struct FileHeader {
@@ -23,19 +26,26 @@ struct FileHeader {
 
 class ROM {
 public:
-    ROM(std::string filename);
+    ROM();
 
     ~ROM();
+
+    void init(std::string filename);
 
     uint8_t Read(uint16_t address);
 
     uint8_t ReadCHR(uint16_t address);
 
+    void Write(uint16_t addr, uint8_t value);
+
+    void execute();
+
     uint8_t MirroringStatus();
 
 private:
+    struct FileHeader header;
+    IMapper *mapper;
     uint8_t mapperNumber;
-    FileHeader header;
     uint8_t *romBanks;
     uint8_t *vromBanks;
 };

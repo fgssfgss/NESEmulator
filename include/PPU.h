@@ -6,8 +6,9 @@
 #define NESEMULATOR_PPU_H
 
 #include "Common.h"
-#include "CPU.h"
+#include "Console.h"
 #include "ROM.h"
+#include "CPU.h"
 
 class CPU;
 
@@ -44,9 +45,7 @@ public:
 
     void Reset();
 
-    void setCPU(CPU *_cpu);
-
-    void setROM(ROM *_rom);
+    void init();
 
     void Write(uint16_t addr, uint8_t value);
 
@@ -119,6 +118,7 @@ private:
     int cycle;
     int scanline;
     uint64_t frame;
+    int mappingType;
     int f;
     int nmiDelay;
     bool prevNmi = false;

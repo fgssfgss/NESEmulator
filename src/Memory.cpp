@@ -9,17 +9,14 @@ Memory::Memory() {
     memset((void *) ram, 0xFF, sizeof(ram));
 }
 
-void Memory::setROM(ROM *_rom) {
-    rom = _rom;
+void Memory::init() {
+    Console& c = Console::Instance();
+
+    ppu = c.getPPU();
+    rom = c.getROM();
+    controller = c.getController();
 }
 
-void Memory::setPPU(PPU *_ppu) {
-    ppu = _ppu;
-}
-
-void Memory::setController(Controller *_c) {
-    c = _c;
-}
 
 uint8_t Memory::Read8(uint16_t addr) {
     // https://wiki.nesdev.com/w/index.php/CPU_memory_map
@@ -35,7 +32,7 @@ uint8_t Memory::Read8(uint16_t addr) {
         return ppu->Read((addr - 0x2000) % 8);
     } else if (addr >= 0x4000 && addr <= 0x4017) {
         if (addr == 0x4016) {
-            return c->Read();
+            return controller->Read();
         }
     } else if (addr >= 0x4018 && addr <= 0x401F) {
         // I/O registers from test mode cpu, and ROM banks
@@ -71,12 +68,12 @@ void Memory::Write8(uint16_t addr, uint8_t value) {
             }
             addCyclesAfterDMA = 513;
         } else if (addr == 0x4016) {
-            c->Write(value);
+            controller->Write(value);
         }
     } else if (addr >= 0x4018 && addr <= 0x401F) {
         // I/O registers from test mode cpu
     } else if (addr >= 0x4020 && addr <= 0xFFFF) {
-        // ROM
+        rom->Write(addr, value);
     }
 }
 

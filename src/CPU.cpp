@@ -24,8 +24,11 @@ void CPU::setPC(uint16_t value) {
     PC = value;
 }
 
-void CPU::setMemory(Memory *_m) {
-    m = _m;
+void CPU::init() {
+    Console& c = Console::Instance();
+
+    m = c.getMemory();
+
     m->Write16(0x0008, 0xF7);
     m->Write16(0x0009, 0xEF);
     m->Write16(0x000A, 0xDF);

@@ -6,9 +6,10 @@
 #define NESEMULATOR_MEMORY_H
 
 #include "Common.h"
+#include "Controller.h"
+#include "Console.h"
 #include "PPU.h"
 #include "ROM.h"
-#include "Controller.h"
 
 class PPU;
 
@@ -18,11 +19,7 @@ public:
 
     virtual ~Memory();
 
-    void setROM(ROM *_rom);
-
-    void setPPU(PPU *_ppu);
-
-    void setController(Controller *_c);
+    void init();
 
     uint8_t Read8(uint16_t addr);
 
@@ -33,13 +30,11 @@ public:
     void Write16(uint16_t addr, uint16_t value);
 
     int addCyclesAfterDMA = 0;
-protected:
 private:
-
     uint8_t ram[0x800];
     ROM *rom;
     PPU *ppu;
-    Controller *c;
+    Controller *controller;
 };
 
 

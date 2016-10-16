@@ -51,18 +51,19 @@ PPU::PPU() {
     }
 }
 
-void PPU::setCPU(CPU *_cpu) { // for NMI
-    cpu = _cpu;
-}
+void PPU::init() { // for NMI
+    Console& c = Console::Instance();
 
-void PPU::setROM(ROM *_rom) {
-    rom = _rom;
-    if (!rom->MirroringStatus()) {
+    cpu = c.getCPU();
+    rom = c.getROM();
+
+    mappingType = rom->MirroringStatus(); // setting initial mapping vram banks
+    if (mappingType == 0) {
         nt1 = ram0;
         nt2 = ram0;
         nt3 = ram1;
         nt4 = ram1;
-    } else {
+    } else if (mappingType == 1) {
         nt1 = ram0;
         nt2 = ram1;
         nt3 = ram0;
@@ -512,6 +513,22 @@ void PPU::tick() {
 
 int PPU::execute() {
     tick();
+
+    if (mappingType != rom->MirroringStatus()) {
+        mappingType = rom->MirroringStatus();
+
+        if (mappingType == 0) {
+            nt1 = ram0;
+            nt2 = ram0;
+            nt3 = ram1;
+            nt4 = ram1;
+        } else if (mappingType == 1) {
+            nt1 = ram0;
+            nt2 = ram1;
+            nt3 = ram0;
+            nt4 = ram1;
+        }
+    }
 
     bool renderingEnabled = ((PPUMASK & flagShowBackground) || (PPUMASK & flagShowSprites));
     bool preLine = (scanline == 261);

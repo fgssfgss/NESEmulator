@@ -6,7 +6,7 @@
 #define NESEMULATOR_CPU_H
 
 #include "Common.h"
-#include "Memory.h"
+#include "Console.h"
 
 class Memory;
 
@@ -18,7 +18,7 @@ public:
 
     int execute();
 
-    void setMemory(Memory *_m);
+    void init();
 
     void setPC(uint16_t value);
 

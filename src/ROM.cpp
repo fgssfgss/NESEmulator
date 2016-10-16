@@ -4,7 +4,7 @@
 
 #include "../include/ROM.h"
 
-ROM::ROM(std::string filename) {
+void ROM::init(std::string filename) {
     std::ifstream in(filename.c_str(), std::ios::binary);
     if (!in.is_open()) {
         std::cout << "Can\'t Open File\n";
@@ -19,10 +19,6 @@ ROM::ROM(std::string filename) {
     std::cout << "PPU Flags:" << std::bitset<8>(header.flagsPPUDetails) << std::endl;
 
     mapperNumber = (header.flagsPPUDetails >> 4);
-    if (mapperNumber != 0) {
-        std::cout << "Sorry, only NROM Mapper is working!" << std::endl;
-        return;
-    }
 
     romBanks = new uint8_t[header.sizePrgRom * 16384 * sizeof(uint8_t)];
     in.read((char *) romBanks, header.sizePrgRom * 16384 * sizeof(uint8_t));
@@ -30,22 +26,40 @@ ROM::ROM(std::string filename) {
     vromBanks = new uint8_t[header.sizeChrRom * 8192 * sizeof(uint8_t)];
     in.read((char *) vromBanks, header.sizeChrRom * 8192 * sizeof(uint8_t));
     in.close();
+
+    if(mapperNumber == 0) {
+        mapper = (IMapper *)new Mapper000(&header);
+    } else if(mapperNumber == 4) {
+        mapper = (IMapper *)new Mapper004(&header);
+    } else {
+        std::cout << "Sorry, only NROM and MMC3 Mapper is working! Current: " << (int)mapperNumber << std::endl;
+        exit(0);
+    }
+
+}
+
+ROM::ROM() {
 }
 
 ROM::~ROM() {
 }
 
 uint8_t ROM::MirroringStatus() {
-    return header.flagsPPUDetails & 1; // 0: vertical/horizontal, 1: horizontal/vertical
+    return mapper->mirroringStatus(); // 0: vertical/horizontal, 1: horizontal/vertical
+}
+
+void ROM::execute() {
+    mapper->execute();
 }
 
 uint8_t ROM::ReadCHR(uint16_t address) {
-    return vromBanks[address];
+    return vromBanks[mapper->mapToVROM(address)]; // this in mapper too
 }
 
 uint8_t ROM::Read(uint16_t address) {
-    if (header.sizePrgRom == 1)
-        return romBanks[address % 16384];
-    else
-        return romBanks[address];
+    return romBanks[mapper->mapToROM(address)];
+}
+
+void ROM::Write(uint16_t addr, uint8_t value) {
+    mapper->writeHandler(addr, value);
 }

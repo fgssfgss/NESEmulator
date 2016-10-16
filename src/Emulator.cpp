@@ -6,7 +6,7 @@
 
 static const uint32_t idealFrameTime = ((1. / 60) * 1000) - 2;
 
-Emulator::Emulator(std::string filename) : cpu(), mem(), rom(filename), ppu(), controller(), isRunning(true) {
+Emulator::Emulator(std::string _filename) : filename(_filename), isRunning(true){
     SDL_Init(SDL_INIT_EVERYTHING);
     SDL_CreateWindowAndRenderer(SCREEN_WIDTH, SCREEN_HEIGHT, 0, &window, &renderer);
     SDL_SetWindowTitle(window, "NESEmulator");
@@ -32,30 +32,18 @@ void Emulator::vertSyncHandler() {
 }
 
 void Emulator::emuThread() {
-    ppu.setROM(&rom);
     auto f1 = std::bind(&Emulator::drawerFunc, this, std::placeholders::_1, std::placeholders::_2,
                         std::placeholders::_3);
     auto f2 = std::bind(&Emulator::vertSyncHandler, this);
-    ppu.setPixelWriterHandler(f1, f2);
-    mem.setROM(&rom);
-    mem.setPPU(&ppu);
-    mem.setController(&controller);
-    cpu.setMemory(&mem);
-    ppu.setCPU(&cpu);
 
-    // slow down this shit, dog
-    while (isRunning) {
+    Console& c = Console::Instance();
+    c.init(filename, f1, f2);
+    while(isRunning) {
         ticks = SDL_GetTicks();
-        int cycles = cpu.execute();
-        if (mem.addCyclesAfterDMA == 513) { // kostyl, for better synchronization
-            cycles += mem.addCyclesAfterDMA;
-            mem.addCyclesAfterDMA = 0;
-        }
-        for (int i = 0; i < cycles * 3; i++)
-            ppu.execute();
+        c.step();
     }
 
-    pthread_exit(0);
+    exit(0);
 }
 
 int Emulator::run() {
@@ -63,6 +51,8 @@ int Emulator::run() {
     bool states[8] = {false, false, false, false, false, false, false, false};
     isRunning = true;
     worker = std::thread(&Emulator::emuThread, this);
+
+    Console& c = Console::Instance();
 
     while (true) {
         if (SDL_PollEvent(&event)) {
@@ -96,7 +86,7 @@ int Emulator::run() {
                     if (!states[7] && event.key.keysym.sym == SDLK_RIGHT) {
                         states[7] = true;
                     }
-                    controller.setButtons(states);
+                    c.getController()->setButtons(states);
                 }
             } else if (event.type == SDL_KEYUP) {
                 if (states[0] && event.key.keysym.sym == SDLK_z) {
@@ -123,7 +113,7 @@ int Emulator::run() {
                 if (states[7] && event.key.keysym.sym == SDLK_RIGHT) {
                     states[7] = false;
                 }
-                controller.setButtons(states);
+                c.getController()->setButtons(states);
             }
         }
     }
