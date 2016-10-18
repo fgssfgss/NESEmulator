@@ -27,18 +27,19 @@ void ROM::init(std::string filename) {
     in.read((char *) vromBanks, header.sizeChrRom * 8192 * sizeof(uint8_t));
     in.close();
 
-    if(mapperNumber == 0) {
-        mapper = (IMapper *)new Mapper000(&header);
-    } else if(mapperNumber == 4) {
-        mapper = (IMapper *)new Mapper004(&header);
+    if (mapperNumber == 0) {
+        mapper = (IMapper *) new Mapper000(&header);
+    } else if (mapperNumber == 4) {
+        mapper = (IMapper *) new Mapper004(&header);
     } else {
-        std::cout << "Sorry, only NROM and MMC3 Mapper is working! Current: " << (int)mapperNumber << std::endl;
+        std::cout << "Sorry, only NROM and MMC3 Mapper is working! Current: " << (int) mapperNumber << std::endl;
         exit(0);
     }
 
 }
 
 ROM::ROM() {
+    memset(SRAM, 0x00, sizeof(SRAM));
 }
 
 ROM::~ROM() {
@@ -62,4 +63,18 @@ uint8_t ROM::Read(uint16_t address) {
 
 void ROM::Write(uint16_t addr, uint8_t value) {
     mapper->writeHandler(addr, value);
+}
+
+uint8_t ROM::ReadSRAM(uint16_t address) {
+    if (!(header.flagsPPUDetails & (1 << 1))) {
+        return 0;
+    }
+    return SRAM[address];
+}
+
+void ROM::WriteSRAM(uint16_t addr, uint8_t value) {
+    if (!(header.flagsPPUDetails & (1 << 1))) {
+        return;
+    }
+    SRAM[addr] = value;
 }

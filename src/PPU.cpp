@@ -52,7 +52,7 @@ PPU::PPU() {
 }
 
 void PPU::init() { // for NMI
-    Console& c = Console::Instance();
+    Console &c = Console::Instance();
 
     cpu = c.getCPU();
     rom = c.getROM();
@@ -604,4 +604,10 @@ int PPU::execute() {
 void PPU::setPixelWriterHandler(std::function<void(int, int, int)> func, std::function<void(void)> vsync) {
     drawer = func;
     vsyncHandler = vsync;
+}
+
+void PPU::getCycleScanlineRendering(int &_cycle, int &_scanline, bool &isRendering) {
+    _cycle = cycle;
+    _scanline = scanline;
+    isRendering = ((PPUMASK & flagShowBackground) && (PPUMASK & flagShowSprites));
 }

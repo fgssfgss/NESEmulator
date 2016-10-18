@@ -55,6 +55,8 @@ public:
 
     uint8_t *getOAMRAM();
 
+    void getCycleScanlineRendering(int &_cycle, int &_scanline, bool &isRendering);
+
     void setPixelWriterHandler(std::function<void(int, int, int)> func, std::function<void(void)> vsync);
 
     void WriteRam(uint16_t addr, uint8_t value);

@@ -28,6 +28,7 @@ private:
     SDL_Window *window;
     SDL_Renderer *renderer;
     SDL_Surface *surface;
+    SDL_Surface *backSurface;
     SDL_Texture *texture;
     std::thread worker;
 

@@ -10,7 +10,7 @@ Memory::Memory() {
 }
 
 void Memory::init() {
-    Console& c = Console::Instance();
+    Console &c = Console::Instance();
 
     ppu = c.getPPU();
     rom = c.getROM();
@@ -37,7 +37,9 @@ uint8_t Memory::Read8(uint16_t addr) {
     } else if (addr >= 0x4018 && addr <= 0x401F) {
         // I/O registers from test mode cpu, and ROM banks
     } else if (addr >= 0x4020 && addr <= 0xFFFF) {
-        if (addr >= 0x8000) {
+        if (addr >= 0x6000 && addr <= 0x7FFF) {
+            return rom->ReadSRAM(addr - 0x6000);
+        } else if (addr >= 0x8000) {
             return rom->Read(addr - 0x8000);
         }
     }
@@ -73,7 +75,12 @@ void Memory::Write8(uint16_t addr, uint8_t value) {
     } else if (addr >= 0x4018 && addr <= 0x401F) {
         // I/O registers from test mode cpu
     } else if (addr >= 0x4020 && addr <= 0xFFFF) {
-        rom->Write(addr, value);
+        if (addr >= 0x6000 && addr <= 0x7FFF) {
+            rom->WriteSRAM(addr - 0x6000, value);
+        } else {
+            rom->Write(addr, value);
+        }
+
     }
 }
 

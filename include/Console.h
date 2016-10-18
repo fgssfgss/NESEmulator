@@ -5,6 +5,8 @@
 #ifndef NESEMULATOR_CONSOLE_H
 #define NESEMULATOR_CONSOLE_H
 
+#pragma once
+
 #include "Common.h"
 #include "CPU.h"
 #include "PPU.h"
@@ -20,8 +22,7 @@ class Controller;
 
 class Console {
 public:
-    static Console& Instance()
-    {
+    static Console &Instance() {
         static Console c;
         return c;
     }
@@ -29,17 +30,25 @@ public:
     void step();
 
     void init(std::string filename, std::function<void(int, int, int)> func, std::function<void(void)> vsync);
-    CPU* getCPU();
-    Memory* getMemory();
-    ROM* getROM();
-    PPU* getPPU();
-    Controller* getController();
+
+    CPU *getCPU();
+
+    Memory *getMemory();
+
+    ROM *getROM();
+
+    PPU *getPPU();
+
+    Controller *getController();
 
 private:
-    Console(){};
-    ~Console(){};
-    Console(Console const&) = delete;
-    Console& operator= (Console const&) = delete;
+    Console() {};
+
+    ~Console() {};
+
+    Console(Console const &) = delete;
+
+    Console &operator=(Console const &) = delete;
 
     CPU *cpu;
     Memory *mem;

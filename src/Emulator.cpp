@@ -6,11 +6,12 @@
 
 static const uint32_t idealFrameTime = ((1. / 60) * 1000) - 2;
 
-Emulator::Emulator(std::string _filename) : filename(_filename), isRunning(true){
+Emulator::Emulator(std::string _filename) : filename(_filename), isRunning(true) {
     SDL_Init(SDL_INIT_EVERYTHING);
     SDL_CreateWindowAndRenderer(SCREEN_WIDTH, SCREEN_HEIGHT, 0, &window, &renderer);
     SDL_SetWindowTitle(window, "NESEmulator");
     surface = SDL_CreateRGBSurface(0, SCREEN_WIDTH, SCREEN_HEIGHT, 32, 0, 0, 0, 0);
+    backSurface = SDL_CreateRGBSurface(0, SCREEN_WIDTH, SCREEN_HEIGHT, 32, 0, 0, 0, 0);
     SDL_RenderClear(renderer);
 }
 
@@ -25,7 +26,8 @@ void Emulator::vertSyncHandler() {
     if (frametime < idealFrameTime) {
         std::this_thread::sleep_for(std::chrono::milliseconds(idealFrameTime - frametime));
     }
-    texture = SDL_CreateTextureFromSurface(renderer, surface);
+    SDL_BlitSurface(surface, NULL, backSurface, NULL);
+    texture = SDL_CreateTextureFromSurface(renderer, backSurface);
     SDL_RenderCopy(renderer, texture, NULL, NULL);
     SDL_DestroyTexture(texture);
     SDL_RenderPresent(renderer);
@@ -36,9 +38,9 @@ void Emulator::emuThread() {
                         std::placeholders::_3);
     auto f2 = std::bind(&Emulator::vertSyncHandler, this);
 
-    Console& c = Console::Instance();
+    Console &c = Console::Instance();
     c.init(filename, f1, f2);
-    while(isRunning) {
+    while (isRunning) {
         ticks = SDL_GetTicks();
         c.step();
     }
@@ -52,7 +54,7 @@ int Emulator::run() {
     isRunning = true;
     worker = std::thread(&Emulator::emuThread, this);
 
-    Console& c = Console::Instance();
+    Console &c = Console::Instance();
 
     while (true) {
         if (SDL_PollEvent(&event)) {

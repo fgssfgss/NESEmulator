@@ -36,6 +36,10 @@ public:
 
     uint8_t ReadCHR(uint16_t address);
 
+    uint8_t ReadSRAM(uint16_t address);
+
+    void WriteSRAM(uint16_t addr, uint8_t value);
+
     void Write(uint16_t addr, uint8_t value);
 
     void execute();
@@ -48,6 +52,7 @@ private:
     uint8_t mapperNumber;
     uint8_t *romBanks;
     uint8_t *vromBanks;
+    uint8_t SRAM[0x2000];
 };
 
 
