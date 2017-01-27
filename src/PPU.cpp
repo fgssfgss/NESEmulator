@@ -177,6 +177,7 @@ uint8_t PPU::Read(uint16_t addr) {
 }
 
 uint8_t PPU::ReadRam(uint16_t addr) {
+    addr %= 0x4000;
     if (addr >= 0x0000 && addr <= 0x1FFF) {
         return rom->ReadCHR(addr);
     } else if (addr >= 0x2000 && addr <= 0x23FF) {
@@ -196,6 +197,7 @@ uint8_t PPU::ReadRam(uint16_t addr) {
 }
 
 void PPU::WriteRam(uint16_t addr, uint8_t value) {
+    addr %= 0x4000;
     if (addr >= 0x0000 && addr <= 0x1FFF) {
         // lol
     } else if (addr >= 0x2000 && addr <= 0x23FF) {
@@ -518,6 +520,7 @@ int PPU::execute() {
         mappingType = rom->MirroringStatus();
 
         if (mappingType == 0) {
+            nt1 = ram0;
             nt1 = ram0;
             nt2 = ram0;
             nt3 = ram1;

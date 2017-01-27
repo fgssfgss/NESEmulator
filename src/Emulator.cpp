@@ -4,15 +4,17 @@
 
 #include "../include/Emulator.h"
 
-static const uint32_t idealFrameTime = ((1. / 60) * 1000) - 2;
+static const uint32_t idealFrameTime = ((1. / 60) * 1000);
 
 Emulator::Emulator(std::string _filename) : filename(_filename), isRunning(true) {
     SDL_Init(SDL_INIT_EVERYTHING);
     SDL_CreateWindowAndRenderer(SCREEN_WIDTH, SCREEN_HEIGHT, 0, &window, &renderer);
     SDL_SetWindowTitle(window, "NESEmulator");
+    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
     surface = SDL_CreateRGBSurface(0, SCREEN_WIDTH, SCREEN_HEIGHT, 32, 0, 0, 0, 0);
-    backSurface = SDL_CreateRGBSurface(0, SCREEN_WIDTH, SCREEN_HEIGHT, 32, 0, 0, 0, 0);
+    texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, SCREEN_WIDTH, SCREEN_HEIGHT);
     SDL_RenderClear(renderer);
+    ticks = SDL_GetTicks();
 }
 
 void Emulator::drawerFunc(int x, int y, int color) {
@@ -22,15 +24,18 @@ void Emulator::drawerFunc(int x, int y, int color) {
 }
 
 void Emulator::vertSyncHandler() {
-    Uint32 frametime = ticks - SDL_GetTicks();
+    SDL_UpdateTexture(texture, NULL, surface->pixels, surface->pitch);
+    Uint32 frametime = SDL_GetTicks() - ticks;
     if (frametime < idealFrameTime) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(idealFrameTime - frametime));
+        SDL_Delay(idealFrameTime - frametime);
     }
-    SDL_BlitSurface(surface, NULL, backSurface, NULL);
-    texture = SDL_CreateTextureFromSurface(renderer, backSurface);
+
+    SDL_RenderClear(renderer);
     SDL_RenderCopy(renderer, texture, NULL, NULL);
-    SDL_DestroyTexture(texture);
     SDL_RenderPresent(renderer);
+    SDL_GL_SwapWindow(window);
+
+    ticks = SDL_GetTicks();
 }
 
 void Emulator::emuThread() {
@@ -41,7 +46,6 @@ void Emulator::emuThread() {
     Console &c = Console::Instance();
     c.init(filename, f1, f2);
     while (isRunning) {
-        ticks = SDL_GetTicks();
         c.step();
     }
 

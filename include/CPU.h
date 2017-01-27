@@ -23,6 +23,7 @@ public:
     void setPC(uint16_t value);
 
     void NMI();
+
     void IRQ();
 
 protected:
@@ -180,23 +181,24 @@ private:
 
     void TYA();
 
-    int cycles;
+    int cycles = 0;
+
     // registers
     uint16_t PC;
     uint8_t A;
     uint8_t X;
     uint8_t Y;
     uint8_t S;
-    struct {
-        uint8_t N: 1;
-        uint8_t V: 1;
-        uint8_t U: 1;
-        uint8_t B: 1;
-        uint8_t D: 1;
-        uint8_t I: 1;
-        uint8_t Z: 1;
-        uint8_t C: 1;
-    } P;
+
+    // flags, can be only 1 or 0
+    uint8_t N;
+    uint8_t V;
+    uint8_t U;
+    uint8_t B;
+    uint8_t D;
+    uint8_t I;
+    uint8_t Z;
+    uint8_t C;
 };
 
 
