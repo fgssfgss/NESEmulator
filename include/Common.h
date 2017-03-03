@@ -18,7 +18,9 @@
 #include <cstdlib>
 #include <functional>
 #include <thread>
+#include <mutex>
 #include <chrono>
+#include <ratio>
 
 const int SCREEN_WIDTH = 256;
 const int SCREEN_HEIGHT = 240;

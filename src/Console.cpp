@@ -19,6 +19,8 @@ void Console::init(std::string filename, std::function<void(int, int, int)> func
 }
 
 void Console::step() {
+    auto t1 = std::chrono::system_clock::now();
+
     int cycles = cpu->execute();
     if (mem->addCyclesAfterDMA == 513) { // kostyl, for better synchronization
         cycles += mem->addCyclesAfterDMA;
@@ -29,6 +31,13 @@ void Console::step() {
         ppu->execute();
         rom->execute();
     }
+
+    auto t2 = std::chrono::system_clock::now();
+
+    std::chrono::duration<double> diff = t2-t1;
+    if(diff.count() == 0.0)
+        return;
+    std::cout << "Duration of tick: " << diff.count() << "s" << std::endl;
 }
 
 Controller *Console::getController() {
