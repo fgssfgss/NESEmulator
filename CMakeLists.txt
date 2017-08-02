@@ -16,7 +16,8 @@ set(SOURCE_FILES main.cpp src/Emulator.cpp include/Emulator.h src/Memory.cpp inc
 add_executable(NESEmulator ${SOURCE_FILES})
 
 if (EMSCRIPTEN)
-    execute_process(COMMAND ${CMAKE_CXX_COMPILER} -O3 -o index.html --preload-file ../${GAME_FILENAME}@game.nes NESEmulator.bc -s USE_SDL=2 -s USE_PTHREADS=1)
+    message("Creating HTML file, please copy index.* and pthread-main.js files to your server root dir")
+    execute_process(COMMAND "${CMAKE_CXX_COMPILER} -O3 -o index.html --preload-file ../${GAME_FILENAME}@game.nes NESEmulator.bc -s USE_SDL=2 -s USE_PTHREADS=1")
 else()
     target_link_libraries(NESEmulator ${SDL2_LIBRARY})
 endif()
