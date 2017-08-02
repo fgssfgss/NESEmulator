@@ -4,23 +4,31 @@
 
 #include "../include/Emulator.h"
 
+#ifndef __EMSCRIPTEN__
 static const uint32_t idealFrameTime = ((1. / 60) * 1000);
 static Uint32 ticks;
+#endif
 static SDL_Window *window;
 static SDL_Renderer *renderer;
 static SDL_Surface *surface;
 static SDL_Texture *texture;
 static pthread_t thread;
+static Uint32 vsyncEvent;
+static bool isRunning;
 
-Emulator::Emulator(std::string _filename) : filename(_filename), isRunning(true) {
+Emulator::Emulator(std::string _filename) : filename(_filename) {
     SDL_Init(SDL_INIT_EVERYTHING);
     SDL_CreateWindowAndRenderer(SCREEN_WIDTH, SCREEN_HEIGHT, 0, &window, &renderer);
     SDL_SetWindowTitle(window, "NESEmulator");
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
     surface = SDL_CreateRGBSurface(0, SCREEN_WIDTH, SCREEN_HEIGHT, 32, 0, 0, 0, 0);
-    texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, SCREEN_WIDTH, SCREEN_HEIGHT);
+    texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, SCREEN_WIDTH,
+                                SCREEN_HEIGHT);
     SDL_RenderClear(renderer);
+    vsyncEvent = SDL_RegisterEvents(1);
+#ifndef __EMSCRIPTEN__
     ticks = SDL_GetTicks();
+#endif
 }
 
 void drawerFunc(int x, int y, uint32_t color) {
@@ -30,97 +38,115 @@ void drawerFunc(int x, int y, uint32_t color) {
 }
 
 void vertSyncHandler(void) {
-    SDL_UpdateTexture(texture, NULL, surface->pixels, surface->pitch);
+#ifndef __EMSCRIPTEN__
     Uint32 frametime = SDL_GetTicks() - ticks;
     if (frametime < idealFrameTime) {
         SDL_Delay(idealFrameTime - frametime);
     }
-
-    SDL_RenderClear(renderer);
-    SDL_RenderCopy(renderer, texture, NULL, NULL);
-    SDL_RenderPresent(renderer);
-    SDL_GL_SwapWindow(window);
-
+#endif
+    if (vsyncEvent != ((Uint32) -1)) {
+        SDL_Event event;
+        SDL_memset(&event, 0, sizeof(event));
+        event.type = vsyncEvent;
+        SDL_PushEvent(&event);
+    }
+#ifndef __EMSCRIPTEN__
     ticks = SDL_GetTicks();
+#endif
 }
 
 void *mainLoop(void *arg) {
     Console &c = Console::Instance();
-    while(true)
+    while (isRunning)
         c.step();
     return arg;
 }
 
-int Emulator::run() {
+void mainLoopStep() {
     SDL_Event event;
     bool states[8] = {false, false, false, false, false, false, false, false};
+    Console &c = Console::Instance();
+    if (SDL_PollEvent(&event)) {
+        if (event.type == vsyncEvent) {
+            SDL_UpdateTexture(texture, NULL, surface->pixels, surface->pitch);
+            SDL_RenderClear(renderer);
+            SDL_RenderCopy(renderer, texture, NULL, NULL);
+            SDL_RenderPresent(renderer);
+        }
+        if (event.type == SDL_QUIT) {
+            isRunning = false;
+        }
+        if (event.type == SDL_KEYDOWN) {
+            if (event.key.repeat == 0) {
+                if (!states[Buttons::A] && event.key.keysym.sym == SDLK_z) {
+                    states[Buttons::A] = true;
+                }
+                if (!states[Buttons::B] && event.key.keysym.sym == SDLK_x) {
+                    states[Buttons::B] = true;
+                }
+                if (!states[Buttons::SELECT] && event.key.keysym.sym == SDLK_SPACE) {
+                    states[Buttons::SELECT] = true;
+                }
+                if (!states[Buttons::START] && event.key.keysym.sym == SDLK_RETURN) {
+                    states[Buttons::START] = true;
+                }
+                if (!states[Buttons::UP] && event.key.keysym.sym == SDLK_UP) {
+                    states[Buttons::UP] = true;
+                }
+                if (!states[Buttons::DOWN] && event.key.keysym.sym == SDLK_DOWN) {
+                    states[Buttons::DOWN] = true;
+                }
+                if (!states[Buttons::LEFT] && event.key.keysym.sym == SDLK_LEFT) {
+                    states[Buttons::LEFT] = true;
+                }
+                if (!states[Buttons::RIGHT] && event.key.keysym.sym == SDLK_RIGHT) {
+                    states[Buttons::RIGHT] = true;
+                }
+                c.getController()->setButtons(states);
+            }
+        } else if (event.type == SDL_KEYUP) {
+            if (states[Buttons::A] && event.key.keysym.sym == SDLK_z) {
+                states[Buttons::A] = false;
+            }
+            if (states[Buttons::B] && event.key.keysym.sym == SDLK_x) {
+                states[Buttons::B] = false;
+            }
+            if (states[Buttons::SELECT] && event.key.keysym.sym == SDLK_SPACE) {
+                states[Buttons::SELECT] = false;
+            }
+            if (states[Buttons::START] && event.key.keysym.sym == SDLK_RETURN) {
+                states[Buttons::START] = false;
+            }
+            if (states[Buttons::UP] && event.key.keysym.sym == SDLK_UP) {
+                states[Buttons::UP] = false;
+            }
+            if (states[Buttons::DOWN] && event.key.keysym.sym == SDLK_DOWN) {
+                states[Buttons::DOWN] = false;
+            }
+            if (states[Buttons::LEFT] && event.key.keysym.sym == SDLK_LEFT) {
+                states[Buttons::LEFT] = false;
+            }
+            if (states[Buttons::RIGHT] && event.key.keysym.sym == SDLK_RIGHT) {
+                states[Buttons::RIGHT] = false;
+            }
+            c.getController()->setButtons(states);
+        }
+    }
+}
+
+int Emulator::run() {
     isRunning = true;
     Console &c = Console::Instance();
     c.init(filename, drawerFunc, vertSyncHandler);
     pthread_create(&thread, NULL, &mainLoop, NULL);
-    while (true) {
-        if (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT) {
-                isRunning = false;
-                return 0;
-            }
-            if (event.type == SDL_KEYDOWN) {
-                if (event.key.repeat == 0) {
-                    if (!states[0] && event.key.keysym.sym == SDLK_z) {
-                        states[0] = true;
-                    }
-                    if (!states[1] && event.key.keysym.sym == SDLK_x) {
-                        states[1] = true;
-                    }
-                    if (!states[2] && event.key.keysym.sym == SDLK_SPACE) {
-                        states[2] = true;
-                    }
-                    if (!states[3] && event.key.keysym.sym == SDLK_RETURN) {
-                        states[3] = true;
-                    }
-                    if (!states[4] && event.key.keysym.sym == SDLK_UP) {
-                        states[4] = true;
-                    }
-                    if (!states[5] && event.key.keysym.sym == SDLK_DOWN) {
-                        states[5] = true;
-                    }
-                    if (!states[6] && event.key.keysym.sym == SDLK_LEFT) {
-                        states[6] = true;
-                    }
-                    if (!states[7] && event.key.keysym.sym == SDLK_RIGHT) {
-                        states[7] = true;
-                    }
-                    c.getController()->setButtons(states);
-                }
-            } else if (event.type == SDL_KEYUP) {
-                if (states[0] && event.key.keysym.sym == SDLK_z) {
-                    states[0] = false;
-                }
-                if (states[1] && event.key.keysym.sym == SDLK_x) {
-                    states[1] = false;
-                }
-                if (states[2] && event.key.keysym.sym == SDLK_SPACE) {
-                    states[2] = false;
-                }
-                if (states[3] && event.key.keysym.sym == SDLK_RETURN) {
-                    states[3] = false;
-                }
-                if (states[4] && event.key.keysym.sym == SDLK_UP) {
-                    states[4] = false;
-                }
-                if (states[5] && event.key.keysym.sym == SDLK_DOWN) {
-                    states[5] = false;
-                }
-                if (states[6] && event.key.keysym.sym == SDLK_LEFT) {
-                    states[6] = false;
-                }
-                if (states[7] && event.key.keysym.sym == SDLK_RIGHT) {
-                    states[7] = false;
-                }
-                c.getController()->setButtons(states);
-            }
-        }
+#ifdef __EMSCRIPTEN__
+    emscripten_set_main_loop(mainLoopStep, 0, 1);
+#else
+    while(isRunning) {
+        mainLoopStep();
     }
+#endif
+    return 0;
 }
 
 Emulator::~Emulator() {

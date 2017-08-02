@@ -18,6 +18,10 @@
 #include <cstdlib>
 #include <pthread.h>
 
+#ifdef EMSCRIPTEN_BUILD
+#include <emscripten.h>
+#endif
+
 const int SCREEN_WIDTH = 256;
 const int SCREEN_HEIGHT = 240;
 

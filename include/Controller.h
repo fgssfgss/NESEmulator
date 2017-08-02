@@ -7,6 +7,17 @@
 
 #include "Common.h"
 
+enum Buttons {
+    A = 0,
+    B,
+    SELECT,
+    START,
+    UP,
+    DOWN,
+    LEFT,
+    RIGHT
+};
+
 class Controller {
 public:
     Controller();

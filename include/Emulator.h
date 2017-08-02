@@ -19,7 +19,6 @@ public:
 
 protected:
 private:
-    bool isRunning;
     std::string filename;
 };
 

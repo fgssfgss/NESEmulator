@@ -13,7 +13,6 @@
       <sourceFolder url="file://$MODULE_DIR$/src/ROM.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/main.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/CMakeLists.txt" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/cmake/FindSDL2_image.cmake" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/cmake/FindSDL2.cmake" isTestSource="false" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
