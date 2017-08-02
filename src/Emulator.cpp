@@ -5,6 +5,12 @@
 #include "../include/Emulator.h"
 
 static const uint32_t idealFrameTime = ((1. / 60) * 1000);
+static Uint32 ticks;
+static SDL_Window *window;
+static SDL_Renderer *renderer;
+static SDL_Surface *surface;
+static SDL_Texture *texture;
+static pthread_t thread;
 
 Emulator::Emulator(std::string _filename) : filename(_filename), isRunning(true) {
     SDL_Init(SDL_INIT_EVERYTHING);
@@ -17,13 +23,13 @@ Emulator::Emulator(std::string _filename) : filename(_filename), isRunning(true)
     ticks = SDL_GetTicks();
 }
 
-void Emulator::drawerFunc(int x, int y, int color) {
+void drawerFunc(int x, int y, uint32_t color) {
     int bpp = surface->format->BytesPerPixel;
     Uint8 *p = (Uint8 *) surface->pixels + y * surface->pitch + x * bpp;
     *(Uint32 *) p = color;
 }
 
-void Emulator::vertSyncHandler() {
+void vertSyncHandler(void) {
     SDL_UpdateTexture(texture, NULL, surface->pixels, surface->pitch);
     Uint32 frametime = SDL_GetTicks() - ticks;
     if (frametime < idealFrameTime) {
@@ -38,28 +44,20 @@ void Emulator::vertSyncHandler() {
     ticks = SDL_GetTicks();
 }
 
-void Emulator::emuThread() {
-    auto f1 = std::bind(&Emulator::drawerFunc, this, std::placeholders::_1, std::placeholders::_2,
-                        std::placeholders::_3);
-    auto f2 = std::bind(&Emulator::vertSyncHandler, this);
-
+void *mainLoop(void *arg) {
     Console &c = Console::Instance();
-    c.init(filename, f1, f2);
-    while (isRunning) {
+    while(true)
         c.step();
-    }
-
-    exit(0);
+    return arg;
 }
 
 int Emulator::run() {
     SDL_Event event;
     bool states[8] = {false, false, false, false, false, false, false, false};
     isRunning = true;
-    worker = std::thread(&Emulator::emuThread, this);
-
     Console &c = Console::Instance();
-
+    c.init(filename, drawerFunc, vertSyncHandler);
+    pthread_create(&thread, NULL, &mainLoop, NULL);
     while (true) {
         if (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
@@ -126,7 +124,7 @@ int Emulator::run() {
 }
 
 Emulator::~Emulator() {
-    worker.join();
+    pthread_join(thread, NULL);
     SDL_FreeSurface(surface);
     SDL_DestroyWindow(window);
     SDL_DestroyRenderer(renderer);

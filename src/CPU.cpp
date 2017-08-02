@@ -164,14 +164,14 @@ void CPU::push16(uint16_t data) {
 
 uint8_t CPU::flag_reg_value() {
     uint8_t n = 0;
-    n |= N;
-    n |= V;
+    n |= (N << 7);
+    n |= (V << 6);
     n |= (U << 5);
     n |= (B << 4);
     n |= (D << 3);
     n |= (I << 2);
-    n |= (Z ? 1 : 0);
-    n |= (C & (1 << 7)) ? 1 : 0;
+    n |= (Z << 1);
+    n |= (C << 0);
     return n;
 }
 
@@ -1143,8 +1143,16 @@ int CPU::execute() {
 
 void CPU::TYA() {
     A = Y;
-    Z = A;
-    N = A;
+    if (A == 0) {
+        Z = 1;
+    } else {
+        Z = 0;
+    }
+    if (A & (1 << 7)) {
+        N = 1;
+    } else {
+        N = 0;
+    }
 }
 
 void CPU::TXS() {
@@ -1153,26 +1161,58 @@ void CPU::TXS() {
 
 void CPU::TXA() {
     A = X;
-    Z = A;
-    N = A;
+    if (A == 0) {
+        Z = 1;
+    } else {
+        Z = 0;
+    }
+    if (A & (1 << 7)) {
+        N = 1;
+    } else {
+        N = 0;
+    }
 }
 
 void CPU::TSX() {
     X = S;
-    Z = X;
-    N = X;
+    if (X == 0) {
+        Z = 1;
+    } else {
+        Z = 0;
+    }
+    if (X & (1 << 7)) {
+        N = 1;
+    } else {
+        N = 0;
+    }
 }
 
 void CPU::TAY() {
     Y = A;
-    Z = Y;
-    N = Y;
+    if (Y == 0) {
+        Z = 1;
+    } else {
+        Z = 0;
+    }
+    if (Y & (1 << 7)) {
+        N = 1;
+    } else {
+        N = 0;
+    }
 }
 
 void CPU::TAX() {
     X = A;
-    Z = X;
-    N = X;
+    if (X == 0) {
+        Z = 1;
+    } else {
+        Z = 0;
+    }
+    if (X & (1 << 7)) {
+        N = 1;
+    } else {
+        N = 0;
+    }
 }
 
 void CPU::SEI() {
@@ -1198,45 +1238,50 @@ void CPU::RTS() {
 void CPU::RTI() {
     PLP();
     I = 0;
-    B = 0;
     uint16_t oldPC = pop16();
     setPC(oldPC);
 }
 
 uint8_t CPU::ROR(uint8_t argument) {
-    uint8_t C_r = (C & (1 << 7)) ? 1 : 0;
-    uint8_t value = ((argument >> 1) | (C_r << 7));
-    Z = value;
-    C = argument;
-    N = value;
+    uint8_t value = ((argument >> 1) | (C << 7));
+    Z = (value == 0) ? 1 : 0;
+    C = (argument & 1) ? 1 : 0;
+    N = (value & (1 << 7)) ? 1 : 0;
     return value;
 }
 
 uint8_t CPU::ROL(uint8_t argument) {
-    uint8_t C_r = (C & (1 << 7)) ? 1 : 0;
-    uint8_t value = ((argument << 1) | C_r);
-    Z = value;
-    C = argument;
-    N = value;
+    uint8_t value = ((argument << 1) | C);
+    Z = (value == 0) ? 1 : 0;
+    C = (argument & (1 << 7)) ? 1 : 0;
+    N = (value & (1 << 7)) ? 1 : 0;
     return value;
 }
 
 void CPU::PLP() {
     uint8_t newStatus = ((pop8() & 0xEF) | 0x20);
-    N = (newStatus & (1 << 7));
-    V = (newStatus & (1 << 6));
+    N = (newStatus & (1 << 7)) ? 1 : 0;
+    V = (newStatus & (1 << 6)) ? 1 : 0;
     U = 1;
     B = (newStatus & (1 << 4)) ? 1 : 0;
     D = (newStatus & (1 << 3)) ? 1 : 0;
     I = (newStatus & (1 << 2)) ? 1 : 0;
-    Z = (newStatus & (1 << 1)) ? 0 : 1; // inverse logic
-    C = (newStatus & (1 << 0)) ? 1 << 7 : 0;
+    Z = (newStatus & (1 << 1)) ? 1 : 0;
+    C = (newStatus & (1 << 0)) ? 1 : 0;
 }
 
 void CPU::PLA() {
     A = pop8();
-    Z = A;
-    N = A;
+    if (A == 0) {
+        Z = 1;
+    } else {
+        Z = 0;
+    }
+    if (A & (1 << 7)) {
+        N = 1;
+    } else {
+        N = 0;
+    }
 }
 
 void CPU::PHP() {
@@ -1249,8 +1294,16 @@ void CPU::PHA() {
 
 void CPU::ORA(uint8_t argument) {
     A = A | argument;
-    Z = A;
-    N = A;
+    if (A == 0) {
+        Z = 1;
+    } else {
+        Z = 0;
+    }
+    if (A & (1 << 7)) {
+        N = 1;
+    } else {
+        N = 0;
+    }
 }
 
 void CPU::NOP() {
@@ -1259,28 +1312,56 @@ void CPU::NOP() {
 
 uint8_t CPU::LSR(uint8_t argument) {
     uint8_t result = argument >> 1;
-    Z = result;
-    N = result;
-    C = (argument & 1) ? 1 << 7 : 0;
+    if (result == 0) {
+        Z = 1;
+    } else {
+        Z = 0;
+    }
+    N = (result & (1 << 7)) ? 1 : 0;
+    C = (argument & 1) ? 1 : 0;
     return result;
 }
 
 void CPU::LDY(uint8_t argument) {
     Y = argument;
-    Z = Y;
-    N = Y;
+    if (Y == 0) {
+        Z = 1;
+    } else {
+        Z = 0;
+    }
+    if (Y & (1 << 7)) {
+        N = 1;
+    } else {
+        N = 0;
+    }
 }
 
 void CPU::LDX(uint8_t argument) {
     X = argument;
-    Z = X;
-    N = X;
+    if (X == 0) {
+        Z = 1;
+    } else {
+        Z = 0;
+    }
+    if (X & (1 << 7)) {
+        N = 1;
+    } else {
+        N = 0;
+    }
 }
 
 void CPU::LDA(uint8_t argument) {
     A = argument;
-    Z = A;
-    N = A;
+    if (A == 0) {
+        Z = 1;
+    } else {
+        Z = 0;
+    }
+    if (A & (1 << 7)) {
+        N = 1;
+    } else {
+        N = 0;
+    }
 }
 
 void CPU::JSR(uint16_t address) {
@@ -1294,57 +1375,121 @@ void CPU::JMP(uint16_t address) {
 
 void CPU::INY() {
     Y++;
-    Z = Y;
-    N = Y;
+    if (Y == 0) {
+        Z = 1;
+    } else {
+        Z = 0;
+    }
+    if (Y & (1 << 7)) {
+        N = 1;
+    } else {
+        N = 0;
+    }
 }
 
 void CPU::INX() {
     X++;
-    Z = X;
-    N = X;
+    if (X == 0) {
+        Z = 1;
+    } else {
+        Z = 0;
+    }
+    if (X & (1 << 7)) {
+        N = 1;
+    } else {
+        N = 0;
+    }
 }
 
 uint8_t CPU::INC(uint8_t argument) {
     argument++;
-    Z = argument;
-    N = argument;
+    if (argument == 0) {
+        Z = 1;
+    } else {
+        Z = 0;
+    }
+    if (argument & (1 << 7)) {
+        N = 1;
+    } else {
+        N = 0;
+    }
     return argument;
 }
 
 void CPU::EOR(uint8_t argument) {
     A = A ^ argument;
-    Z = A;
-    N = A;
+    if (A == 0) {
+        Z = 1;
+    } else {
+        Z = 0;
+    }
+    if (A & (1 << 7)) {
+        N = 1;
+    } else {
+        N = 0;
+    }
 }
 
 void CPU::DEY() {
     Y--;
-    Z = Y;
-    N = Y;
+    if (Y == 0) {
+        Z = 1;
+    } else {
+        Z = 0;
+    }
+    if (Y & (1 << 7)) {
+        N = 1;
+    } else {
+        N = 0;
+    }
 }
 
 void CPU::DEX() {
     X--;
-    Z = X;
-    N = X;
+    if (X == 0) {
+        Z = 1;
+    } else {
+        Z = 0;
+    }
+    if (X & (1 << 7)) {
+        N = 1;
+    } else {
+        N = 0;
+    }
 }
 
 uint8_t CPU::DEC(uint8_t argument) {
     argument--;
-    Z = argument;
-    N = argument;
+    if (argument == 0) {
+        Z = 1;
+    } else {
+        Z = 0;
+    }
+    if (argument & (1 << 7)) {
+        N = 1;
+    } else {
+        N = 0;
+    }
     return argument;
 }
 
 void CPU::CMP(uint8_t reg, uint8_t argument) { // CMP, CPY, CPX
     uint16_t result = uint16_t(reg) - argument;
     if (result < 0x100) {
-        C = 1 << 7;
+        C = 1;
     } else {
         C = 0;
     }
-    N = result & 0xFF;
-    Z = result & 0xFF;
+    if (result & (1 << 7)) {
+        N = 1;
+    } else {
+        N = 0;
+    }
+    if (reg == argument) {
+        Z = 1;
+    } else {
+        Z = 0;
+    }
 }
 
 void CPU::CLV() {
@@ -1364,21 +1509,21 @@ void CPU::CLC() {
 }
 
 void CPU::BVS(int8_t address) {
-    if (V & (1 << 6)) {
+    if (V == 1) {
         cycles++;
         PC = (int16_t) PC + address; // TODO: check crosspage
     }
 }
 
 void CPU::BVC(int8_t address) {
-    if (!(V & (1 << 6))) {
+    if (V == 0) {
         cycles++;
         PC = (int16_t) PC + address; // TODO: check crosspage
     }
 }
 
 void CPU::BRK() {
-    if (I == 1 || B == 1) {
+    if (I == 1) {
         return; // if we're in interrupt - can't go there twice
     }
     push16(PC);
@@ -1389,48 +1534,52 @@ void CPU::BRK() {
 }
 
 void CPU::BPL(int8_t address) {
-    if (!(N & (1 << 7))) {
+    if (N == 0) {
         cycles++;
         PC = (int16_t) PC + address; // TODO: check crosspage
     }
 }
 
 void CPU::BNE(int8_t address) {
-    if (Z != 0) {
-        cycles++;
-        PC = (int16_t) PC + address; // TODO: check crosspage
-    }
-}
-
-void CPU::BMI(int8_t address) {
-    if (N & (1 << 7)) {
-        cycles++;
-        PC = (int16_t) PC + address; // TODO: check crosspage
-    }
-}
-
-void CPU::BIT(uint8_t argument) {
-    Z = argument & A;
-    V = argument;
-    N = argument;
-}
-
-void CPU::BEQ(int8_t address) {
     if (Z == 0) {
         cycles++;
         PC = (int16_t) PC + address; // TODO: check crosspage
     }
 }
 
+void CPU::BMI(int8_t address) {
+    if (N == 1) {
+        cycles++;
+        PC = (int16_t) PC + address; // TODO: check crosspage
+    }
+}
+
+void CPU::BIT(uint8_t argument) {
+    if ((argument & A) == 0) {
+        Z = 1;
+    } else {
+        Z = 0;
+    }
+    V = (argument & (1 << 6)) ? 1 : 0;
+    N = (argument & (1 << 7)) ? 1 : 0;
+}
+
+void CPU::BEQ(int8_t address) {
+    if (Z == 1) {
+        cycles++;
+        PC = (int16_t) PC + address; // TODO: check crosspage
+    }
+}
+
 void CPU::BCS(int8_t address) {
-    if (C & (1 << 7)) {
+    if (C == 1) {
         cycles++;
         PC = (int16_t) PC + address; // TODO: check crosspage
     }
 }
 
 void CPU::BCC(int8_t address) {
-    if (!(C & (1 << 7))) {
+    if (C == 0) {
         cycles++;
         PC = (int16_t) PC + address; // TODO: check crosspage
     }
@@ -1438,25 +1587,36 @@ void CPU::BCC(int8_t address) {
 
 uint8_t CPU::ASL(uint8_t argument) {
     uint8_t result = argument << 1;
-    Z = result;
-    N = result;
-    C = argument;
+    if (result == 0) {
+        Z = 1;
+    } else {
+        Z = 0;
+    }
+    N = (result & (1 << 7)) ? 1 : 0;
+    C = (argument & (1 << 7)) ? 1 : 0;
     return result;
 }
 
 void CPU::AND(uint8_t argument) {
     A = A & argument;
-    Z = A;
-    N = A;
+    if (A == 0) {
+        Z = 1;
+    } else {
+        Z = 0;
+    }
+    if (A & (1 << 7)) {
+        N = 1;
+    } else {
+        N = 0;
+    }
 }
 
 void CPU::ADC(uint8_t argument) {
     uint16_t sum = A + argument + C;
-    C = (sum > 0xFF) ? 1 << 7 : 0;
-    V = (!((A ^ argument) & (1 << 7)) && ((uint16_t(A) ^ sum) & (1 << 7))) ? 1 << 6 : 0;
-    Z = (sum & 0xFF);
-    N = (sum & 0xFF);
+    C = (sum > 0xFF) ? 1 : 0;
+    V = (!((A ^ argument) & (1 << 7)) && ((uint16_t(A) ^ sum) & (1 << 7))) ? 1 : 0;
+    Z = ((sum & 0xFF) == 0) ? 1 : 0;
+    N = (sum & (1 << 7)) ? 1 : 0;
     A = uint8_t(sum & 0xFF);
 }
-
 

@@ -2,9 +2,10 @@
 // Created by lin-k on 15.10.2016.
 //
 
+#include <SDL_timer.h>
 #include "../include/Console.h"
 
-void Console::init(std::string filename, std::function<void(int, int, int)> func, std::function<void(void)> vsync) {
+void Console::init(std::string filename, void (*draw)(int, int, uint32_t), void (*vsync)(void)) {
     rom = new ROM();
     ppu = new PPU();
     cpu = new CPU();
@@ -15,12 +16,11 @@ void Console::init(std::string filename, std::function<void(int, int, int)> func
     mem->init();
     cpu->init();
     ppu->init();
-    ppu->setPixelWriterHandler(func, vsync);
+    this->draw = draw;
+    this->vsync = vsync;
 }
 
 void Console::step() {
-    auto t1 = std::chrono::system_clock::now();
-
     int cycles = cpu->execute();
     if (mem->addCyclesAfterDMA == 513) { // kostyl, for better synchronization
         cycles += mem->addCyclesAfterDMA;
@@ -31,13 +31,14 @@ void Console::step() {
         ppu->execute();
         rom->execute();
     }
+}
 
-    auto t2 = std::chrono::system_clock::now();
+void Console::callVSync() {
+    vsync();
+}
 
-    std::chrono::duration<double> diff = t2-t1;
-    if(diff.count() == 0.0)
-        return;
-    std::cout << "Duration of tick: " << diff.count() << "s" << std::endl;
+void Console::putPixel(int x, int y, uint32_t color) {
+    draw(x, y, color);
 }
 
 Controller *Console::getController() {

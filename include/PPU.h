@@ -57,8 +57,6 @@ public:
 
     void getCycleScanlineRendering(int &_cycle, int &_scanline, bool &isRendering);
 
-    void setPixelWriterHandler(std::function<void(int, int, int)> func, std::function<void(void)> vsync);
-
     void WriteRam(uint16_t addr, uint8_t value);
 
     void setVSync();
@@ -109,9 +107,6 @@ public:
 
 private:
     uint16_t trnslt_addr(uint16_t addr);
-
-    std::function<void(int, int, int)> drawer;
-    std::function<void(void)> vsyncHandler;
 
     uint8_t PPUCTRL;
     uint8_t PPUMASK;

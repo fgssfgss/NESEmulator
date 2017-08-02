@@ -347,7 +347,8 @@ void PPU::renderPixel() {
         }
     }
 
-    drawer(x, y, palette[readPalette(color) % 64]);
+    Console &c = Console::Instance();
+    c.putPixel(x, y, palette[readPalette(color) % 64]);
 }
 
 uint8_t PPU::readPalette(uint16_t addr) {
@@ -442,7 +443,8 @@ void PPU::evaluateSprites() {
 }
 
 void PPU::setVSync() {
-    vsyncHandler();
+    Console &c = Console::Instance();
+    c.callVSync();
     PPUSTATUS |= flagNmiOccured;
     nmiChange();
 }
@@ -565,11 +567,6 @@ int PPU::execute() {
     }
 
     return frame;
-}
-
-void PPU::setPixelWriterHandler(std::function<void(int, int, int)> func, std::function<void(void)> vsync) {
-    drawer = func;
-    vsyncHandler = vsync;
 }
 
 void PPU::getCycleScanlineRendering(int &_cycle, int &_scanline, bool &isRendering) {

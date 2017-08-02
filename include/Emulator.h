@@ -13,26 +13,12 @@ class Emulator {
 public:
     Emulator(std::string _filename);
 
-    void emuThread();
-
     int run();
-
-    void drawerFunc(int x, int y, int color);
-
-    void vertSyncHandler();
 
     virtual ~Emulator();
 
 protected:
 private:
-    SDL_Window *window;
-    SDL_Renderer *renderer;
-    SDL_Surface *surface;
-    SDL_Surface *backSurface;
-    SDL_Texture *texture;
-    std::thread worker;
-
-    Uint32 ticks;
     bool isRunning;
     std::string filename;
 };
