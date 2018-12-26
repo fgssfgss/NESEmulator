@@ -12,7 +12,7 @@ else()
     include_directories(${SDL2_INCLUDE_DIR})
 endif()
 
-set(SOURCE_FILES main.cpp src/Emulator.cpp include/Emulator.h src/Memory.cpp include/Memory.h include/Common.h src/CPU.cpp include/CPU.h src/ROM.cpp include/ROM.h src/PPU.cpp include/PPU.h src/Controller.cpp include/Controller.h include/IMapper.h src/Mapper000.cpp include/Mapper000.h src/Mapper004.cpp include/Mapper004.h src/Console.cpp include/Console.h)
+set(SOURCE_FILES main.cpp src/Emulator.cpp include/Emulator.h src/Memory.cpp include/Memory.h include/Common.h src/CPU.cpp include/CPU.h src/ROM.cpp include/ROM.h src/PPU.cpp include/PPU.h src/Controller.cpp include/Controller.h include/IMapper.h src/Mapper000.cpp include/Mapper000.h src/Mapper004.cpp include/Mapper004.h src/Console.cpp include/Console.h src/APU.cpp include/APU.h)
 add_executable(NESEmulator ${SOURCE_FILES})
 
 if (EMSCRIPTEN)

@@ -13,12 +13,14 @@
 #include "ROM.h"
 #include "Memory.h"
 #include "Controller.h"
+#include "APU.h"
 
 class PPU;
 class CPU;
 class Memory;
 class ROM;
 class Controller;
+class APU;
 
 class Console {
 public:
@@ -45,6 +47,8 @@ public:
 
     Controller *getController();
 
+    APU *getAPU();
+
 private:
     Console() {};
 
@@ -61,6 +65,7 @@ private:
     Memory *mem;
     ROM *rom;
     PPU *ppu;
+    APU *apu;
     Controller *controller;
 };
 

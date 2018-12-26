@@ -9,6 +9,7 @@ void Console::init(std::string filename, void (*draw)(int, int, uint32_t), void 
     rom = new ROM();
     ppu = new PPU();
     cpu = new CPU();
+    apu = new APU();
     mem = new Memory();
     controller = new Controller();
 
@@ -59,4 +60,8 @@ Memory *Console::getMemory() {
 
 ROM *Console::getROM() {
     return rom;
+}
+
+APU *Console::getAPU() {
+    return apu;
 }
