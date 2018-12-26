@@ -64,7 +64,7 @@ void *mainLoop(void *arg) {
 
 void mainLoopStep() {
     SDL_Event event;
-    bool states[8] = {false, false, false, false, false, false, false, false};
+    static bool states[8] = {false, false, false, false, false, false, false, false};
     Console &c = Console::Instance();
     if (SDL_PollEvent(&event)) {
         if (event.type == vsyncEvent) {
@@ -102,9 +102,10 @@ void mainLoopStep() {
                 if (!states[Buttons::RIGHT] && event.key.keysym.sym == SDLK_RIGHT) {
                     states[Buttons::RIGHT] = true;
                 }
-                c.getController()->setButtons(states);
+
             }
-        } else if (event.type == SDL_KEYUP) {
+        }
+        if (event.type == SDL_KEYUP) {
             if (states[Buttons::A] && event.key.keysym.sym == SDLK_z) {
                 states[Buttons::A] = false;
             }
@@ -129,8 +130,8 @@ void mainLoopStep() {
             if (states[Buttons::RIGHT] && event.key.keysym.sym == SDLK_RIGHT) {
                 states[Buttons::RIGHT] = false;
             }
-            c.getController()->setButtons(states);
         }
+        c.getController()->setButtons(states);
     }
 }
 

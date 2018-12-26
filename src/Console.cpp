@@ -5,7 +5,7 @@
 #include <SDL_timer.h>
 #include "../include/Console.h"
 
-void Console::init(std::string filename, void (*draw)(int, int, uint32_t), void (*vsync)(void)) {
+void Console::init(std::string filename, void (*draw)(int, int, uint32_t), void (*vsync)()) {
     rom = new ROM();
     ppu = new PPU();
     cpu = new CPU();
