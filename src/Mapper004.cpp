@@ -76,7 +76,7 @@ void Mapper004::writeHandler(uint16_t addr, uint8_t value) {
     }
 }
 
-uint32_t Mapper004::calcRBankOffset(int8_t idx) {
+uint32_t Mapper004::calcRBankOffset(uint8_t idx) {
     if (idx > 0x80) {
         idx -= 0x100;
     }
@@ -88,7 +88,7 @@ uint32_t Mapper004::calcRBankOffset(int8_t idx) {
     return uint32_t(offset);
 }
 
-uint32_t Mapper004::calcVBankOffset(int8_t idx) {
+uint32_t Mapper004::calcVBankOffset(uint8_t idx) {
     if (idx > 0x80) {
         idx -= 0x100;
     }

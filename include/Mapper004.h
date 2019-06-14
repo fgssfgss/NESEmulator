@@ -31,9 +31,9 @@ private:
 
     void switchBanks();
 
-    uint32_t calcRBankOffset(int8_t idx);
+    uint32_t calcRBankOffset(uint8_t idx);
 
-    uint32_t calcVBankOffset(int8_t idx);
+    uint32_t calcVBankOffset(uint8_t idx);
 
     struct FileHeader *params;
     bool irqEnabled = false;

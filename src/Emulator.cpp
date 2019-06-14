@@ -5,7 +5,7 @@
 #include "../include/Emulator.h"
 
 #ifndef __EMSCRIPTEN__
-static const uint32_t idealFrameTime = ((1. / 60) * 1000);
+static const uint32_t idealFrameTime = ((1. / 50) * 1000);
 static Uint32 ticks;
 #endif
 static SDL_Window *window;
@@ -57,8 +57,9 @@ void vertSyncHandler(void) {
 
 void *mainLoop(void *arg) {
     Console &c = Console::Instance();
-    while (isRunning)
-        c.step();
+    while (isRunning) {
+	    c.frame();
+    }
     return arg;
 }
 
@@ -136,6 +137,7 @@ void mainLoopStep() {
 }
 
 int Emulator::run() {
+	Uint32 l_ticks = 0;
     isRunning = true;
     Console &c = Console::Instance();
     c.init(filename, drawerFunc, vertSyncHandler);
@@ -145,6 +147,7 @@ int Emulator::run() {
 #else
     while(isRunning) {
         mainLoopStep();
+        SDL_Delay(idealFrameTime / 5);
     }
 #endif
     return 0;

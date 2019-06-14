@@ -191,14 +191,14 @@ private:
     uint8_t S;
 
     // flags, can be only 1 or 0
-    uint8_t N;
-    uint8_t V;
-    uint8_t U;
-    uint8_t B;
-    uint8_t D;
-    uint8_t I;
-    uint8_t Z;
-    uint8_t C;
+    uint8_t N:1;
+    uint8_t V:1;
+    uint8_t U:1;
+    uint8_t B:1;
+    uint8_t D:1;
+    uint8_t I:1;
+    uint8_t Z:1;
+    uint8_t C:1;
 };
 
 

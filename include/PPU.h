@@ -9,8 +9,10 @@
 #include "Console.h"
 #include "ROM.h"
 #include "CPU.h"
+#include "Memory.h"
 
 class CPU;
+class Memory;
 
 enum FlagsCTRL {
     flagNameTable = 3,
@@ -115,6 +117,7 @@ private:
     uint8_t dummy_reg;
 
     int cycle;
+	int cpu_cycles;
     int scanline;
     uint64_t frame;
     int mirroringType;
@@ -157,6 +160,7 @@ private:
 
     ROM *rom;
     CPU *cpu;
+    Memory *mem;
 };
 
 

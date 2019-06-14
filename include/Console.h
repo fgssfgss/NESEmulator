@@ -29,7 +29,7 @@ public:
         return c;
     }
 
-    void step();
+    void frame();
 
     void putPixel(int x, int y, uint32_t color);
 

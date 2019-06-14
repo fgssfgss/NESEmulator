@@ -59,6 +59,7 @@ void PPU::init() { // for NMI
 
     cpu = c.getCPU();
     rom = c.getROM();
+    mem = c.getMemory();
 
     mirroringType = rom->MirroringStatus(); // setting initial mapping vram banks
 }
@@ -463,6 +464,12 @@ void PPU::nmiChange() {
 }
 
 void PPU::tick() {
+	cpu_cycles = 8;
+	if (mem->addCyclesAfterDMA == 513) { // kostyl, for better synchronization
+		cpu_cycles += mem->addCyclesAfterDMA;
+		mem->addCyclesAfterDMA = 0;
+	}
+
     if (nmiDelay > 0) {
         nmiDelay--;
         if (nmiDelay == 0 && (PPUCTRL & flagNmi) && (PPUSTATUS & flagNmiOccured)) {
@@ -488,6 +495,10 @@ void PPU::tick() {
             frame++;
             f ^= 1;
         }
+    }
+
+    if (cycle % cpu_cycles == 0) {
+	    cpu_cycles = cpu->execute();
     }
 }
 

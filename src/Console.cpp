@@ -21,17 +21,11 @@ void Console::init(std::string filename, void (*draw)(int, int, uint32_t), void 
     this->vsync = vsync;
 }
 
-void Console::step() {
-    int cycles = cpu->execute();
-    if (mem->addCyclesAfterDMA == 513) { // kostyl, for better synchronization
-        cycles += mem->addCyclesAfterDMA;
-        mem->addCyclesAfterDMA = 0;
-    }
-
-    for (int i = 0; i < cycles * 3; i++) {
-        ppu->execute();
-        rom->execute();
-    }
+void Console::frame() {
+	for (int i = 0; i < 106000; i++) {
+		ppu->execute();
+		rom->execute();
+	}
 }
 
 void Console::callVSync() {
