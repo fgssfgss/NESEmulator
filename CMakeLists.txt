@@ -3,7 +3,7 @@ project(NESEmulator)
 
 if (EMSCRIPTEN)
     set(GAME_FILENAME "game.nes")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DEMSCRIPTEN_BUILD -std=c++11 -s USE_SDL=2 -s USE_PTHREADS=1 -O3")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DEMSCRIPTEN_BUILD -std=c++11 -s USE_SDL=2 -s USE_PTHREADS=1 -O3 -finline-functions")
     set(CMAKE_EXECUTABLE_SUFFIX ".bc")
 else()
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${NESEmulator_SOURCE_DIR}/cmake")

@@ -4,10 +4,12 @@
 
 #include "../include/Emulator.h"
 
-#ifndef __EMSCRIPTEN__
-static const uint32_t idealFrameTime = ((1. / 50) * 1000);
-static Uint32 ticks;
+#ifdef __EMSCRIPTEN__
+#include <emscripten/html5.h>
 #endif
+
+static const uint32_t idealFrameTime = ((1. / 60) * 1000);
+static Uint32 ticks;
 static SDL_Window *window;
 static SDL_Renderer *renderer;
 static SDL_Surface *surface;
@@ -18,6 +20,7 @@ static bool isRunning;
 
 Emulator::Emulator(std::string _filename) : filename(_filename) {
     SDL_Init(SDL_INIT_EVERYTHING);
+	SDL_SetHint(SDL_HINT_EMSCRIPTEN_KEYBOARD_ELEMENT, "#canvas");
     SDL_CreateWindowAndRenderer(SCREEN_WIDTH, SCREEN_HEIGHT, 0, &window, &renderer);
     SDL_SetWindowTitle(window, "NESEmulator");
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
@@ -38,27 +41,28 @@ void drawerFunc(int x, int y, uint32_t color) {
 }
 
 void vertSyncHandler(void) {
-#ifndef __EMSCRIPTEN__
     Uint32 frametime = SDL_GetTicks() - ticks;
     if (frametime < idealFrameTime) {
         SDL_Delay(idealFrameTime - frametime);
     }
-#endif
+
     if (vsyncEvent != ((Uint32) -1)) {
         SDL_Event event;
         SDL_memset(&event, 0, sizeof(event));
         event.type = vsyncEvent;
         SDL_PushEvent(&event);
     }
-#ifndef __EMSCRIPTEN__
+
     ticks = SDL_GetTicks();
-#endif
 }
 
 void *mainLoop(void *arg) {
     Console &c = Console::Instance();
     while (isRunning) {
 	    c.frame();
+#ifdef __EMSCRIPTEN__
+	    SDL_Delay(2);
+#endif
     }
     return arg;
 }
@@ -74,6 +78,7 @@ void mainLoopStep() {
             SDL_RenderCopy(renderer, texture, NULL, NULL);
             SDL_RenderPresent(renderer);
         }
+#ifndef __EMSCRIPTEN__
         if (event.type == SDL_QUIT) {
             isRunning = false;
         }
@@ -133,8 +138,71 @@ void mainLoopStep() {
             }
         }
         c.getController()->setButtons(states);
+#endif
     }
 }
+
+#ifdef __EMSCRIPTEN__
+#define CMP(ev, kcode) if (strcmp(ev->code, kcode) == 0) \
+
+static EM_BOOL keyCallback(int eventType, const EmscriptenKeyboardEvent *event, void *userData) {
+	static bool states[8] = {false, false, false, false, false, false, false, false};
+	Controller *controller = (Controller *)userData;
+	if (eventType == EMSCRIPTEN_EVENT_KEYDOWN) {
+		if (!states[Buttons::A] && event->keyCode == 90) {
+            states[Buttons::A] = true;
+        }
+        if (!states[Buttons::B] && event->keyCode == 65) {
+            states[Buttons::B] = true;
+        }
+        if (!states[Buttons::SELECT] && event->keyCode == 32) {
+        	states[Buttons::SELECT] = true;
+        }
+        if (!states[Buttons::START] && event->keyCode == 13) {
+        	states[Buttons::START] = true;
+        }
+        if (!states[Buttons::UP] && event->keyCode == 38) {
+        	states[Buttons::UP] = true;
+        }
+        if (!states[Buttons::DOWN] && event->keyCode == 40) {
+        	states[Buttons::DOWN] = true;
+        }
+        if (!states[Buttons::LEFT] && event->keyCode == 37) {
+        	states[Buttons::LEFT] = true;
+        }
+        if (!states[Buttons::RIGHT] && event->keyCode == 39) {
+        	states[Buttons::RIGHT] = true;
+        }
+	} else if (eventType == EMSCRIPTEN_EVENT_KEYUP) {
+		if (states[Buttons::A] && event->keyCode == 90) {
+			states[Buttons::A] = false;
+		}
+		if (states[Buttons::B] && event->keyCode == 65) {
+			states[Buttons::B] = false;
+		}
+		if (states[Buttons::SELECT] && event->keyCode == 32) {
+			states[Buttons::SELECT] = false;
+		}
+		if (states[Buttons::START] && event->keyCode == 13) {
+			states[Buttons::START] = false;
+		}
+		if (states[Buttons::UP] && event->keyCode == 38) {
+			states[Buttons::UP] = false;
+		}
+		if (states[Buttons::DOWN] && event->keyCode == 40) {
+			states[Buttons::DOWN] = false;
+		}
+		if (states[Buttons::LEFT] && event->keyCode == 37) {
+			states[Buttons::LEFT] = false;
+		}
+		if (states[Buttons::RIGHT] && event->keyCode == 39) {
+			states[Buttons::RIGHT] = false;
+		}
+	}
+	controller->setButtons(states);
+	return EM_TRUE;
+}
+#endif
 
 int Emulator::run() {
 	Uint32 l_ticks = 0;
@@ -143,6 +211,8 @@ int Emulator::run() {
     c.init(filename, drawerFunc, vertSyncHandler);
     pthread_create(&thread, NULL, &mainLoop, NULL);
 #ifdef __EMSCRIPTEN__
+	emscripten_set_keydown_callback(NULL, c.getController(), true, keyCallback);
+	emscripten_set_keyup_callback(NULL, c.getController(), true, keyCallback);
     emscripten_set_main_loop(mainLoopStep, 0, 1);
 #else
     while(isRunning) {
