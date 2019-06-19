@@ -10,8 +10,10 @@
 #include "Console.h"
 #include "PPU.h"
 #include "ROM.h"
+#include "APU.h"
 
 class PPU;
+class APU;
 
 class Memory {
 public:
@@ -34,6 +36,7 @@ private:
     uint8_t ram[0x800];
     ROM *rom;
     PPU *ppu;
+    APU *apu;
     Controller *controller;
 };
 

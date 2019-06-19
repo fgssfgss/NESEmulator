@@ -35,7 +35,7 @@ public:
 
     void callVSync();
 
-    void init(std::string filename, void (*draw)(int, int, uint32_t), void (*vsync)(void));
+    void init(std::string filename, const long sample_rate, void (*draw)(int, int, uint32_t), void (*vsync)(void));
 
     CPU *getCPU();
 

@@ -470,6 +470,10 @@ void PPU::tick() {
 		mem->addCyclesAfterDMA = 0;
 	}
 
+	if (cycle % cpu_cycles == 0) {
+		cpu_cycles = cpu->execute();
+	}
+
     if (nmiDelay > 0) {
         nmiDelay--;
         if (nmiDelay == 0 && (PPUCTRL & flagNmi) && (PPUSTATUS & flagNmiOccured)) {
@@ -495,10 +499,6 @@ void PPU::tick() {
             frame++;
             f ^= 1;
         }
-    }
-
-    if (cycle % cpu_cycles == 0) {
-	    cpu_cycles = cpu->execute();
     }
 }
 

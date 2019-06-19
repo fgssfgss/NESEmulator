@@ -15,6 +15,7 @@ void Memory::init() {
     ppu = c.getPPU();
     rom = c.getROM();
     controller = c.getController();
+    apu = c.getAPU();
 }
 
 
@@ -33,6 +34,10 @@ uint8_t Memory::Read8(uint16_t addr) {
     } else if (addr >= 0x4000 && addr <= 0x4017) {
         if (addr == 0x4016) {
             return controller->Read();
+        } else if (addr == 0x4017) {
+        	return 0; // TODO: second controller is not implemented
+        } else {
+        	return apu->read(addr);
         }
     } else if (addr >= 0x4018 && addr <= 0x401F) {
         // I/O registers from test mode cpu, and ROM banks
@@ -71,6 +76,10 @@ void Memory::Write8(uint16_t addr, uint8_t value) {
             addCyclesAfterDMA = 513;
         } else if (addr == 0x4016) {
             controller->Write(value);
+        } else if (addr == 0x4017) {
+        	// TODO: not implemented
+        } else {
+        	apu->write(addr, value);
         }
     } else if (addr >= 0x4018 && addr <= 0x401F) {
         // I/O registers from test mode cpu

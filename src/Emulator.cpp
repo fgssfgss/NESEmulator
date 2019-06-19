@@ -4,11 +4,14 @@
 
 #include "../include/Emulator.h"
 
+#include "../apu_emu/Sound_Queue.h"
+
 #ifdef __EMSCRIPTEN__
 #include <emscripten/html5.h>
 #endif
 
-static const uint32_t idealFrameTime = ((1. / 60) * 1000);
+static const uint32_t idealFrameTime = ((1. / 50) * 1000);
+static const long sample_rate = 44100;
 static Uint32 ticks;
 static SDL_Window *window;
 static SDL_Renderer *renderer;
@@ -17,8 +20,13 @@ static SDL_Texture *texture;
 static pthread_t thread;
 static Uint32 vsyncEvent;
 static bool isRunning;
+static Sound_Queue* sound_queue;
 
-Emulator::Emulator(std::string _filename) : filename(_filename) {
+static void play_samples(const blip_sample_t* samples, long count) {
+	sound_queue->write(samples, count);
+}
+
+Emulator::Emulator(std::string _filename) : filename(move(_filename)) {
     SDL_Init(SDL_INIT_EVERYTHING);
 	SDL_SetHint(SDL_HINT_EMSCRIPTEN_KEYBOARD_ELEMENT, "#canvas");
     SDL_CreateWindowAndRenderer(SCREEN_WIDTH, SCREEN_HEIGHT, 0, &window, &renderer);
@@ -29,6 +37,8 @@ Emulator::Emulator(std::string _filename) : filename(_filename) {
                                 SCREEN_HEIGHT);
     SDL_RenderClear(renderer);
     vsyncEvent = SDL_RegisterEvents(1);
+	sound_queue = new Sound_Queue;
+	sound_queue->init(sample_rate);
 #ifndef __EMSCRIPTEN__
     ticks = SDL_GetTicks();
 #endif
@@ -60,9 +70,6 @@ void *mainLoop(void *arg) {
     Console &c = Console::Instance();
     while (isRunning) {
 	    c.frame();
-#ifdef __EMSCRIPTEN__
-	    SDL_Delay(2);
-#endif
     }
     return arg;
 }
@@ -71,6 +78,7 @@ void mainLoopStep() {
     SDL_Event event;
     static bool states[8] = {false, false, false, false, false, false, false, false};
     Console &c = Console::Instance();
+    c.getAPU()->step(play_samples);
     if (SDL_PollEvent(&event)) {
         if (event.type == vsyncEvent) {
             SDL_UpdateTexture(texture, NULL, surface->pixels, surface->pitch);
@@ -205,10 +213,9 @@ static EM_BOOL keyCallback(int eventType, const EmscriptenKeyboardEvent *event, 
 #endif
 
 int Emulator::run() {
-	Uint32 l_ticks = 0;
     isRunning = true;
     Console &c = Console::Instance();
-    c.init(filename, drawerFunc, vertSyncHandler);
+    c.init(filename, sample_rate, drawerFunc, vertSyncHandler);
     pthread_create(&thread, NULL, &mainLoop, NULL);
 #ifdef __EMSCRIPTEN__
 	emscripten_set_keydown_callback(NULL, c.getController(), true, keyCallback);
@@ -225,6 +232,7 @@ int Emulator::run() {
 
 Emulator::~Emulator() {
     pthread_join(thread, NULL);
+    delete sound_queue;
     SDL_FreeSurface(surface);
     SDL_DestroyWindow(window);
     SDL_DestroyRenderer(renderer);

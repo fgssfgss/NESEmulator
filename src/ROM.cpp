@@ -7,7 +7,7 @@
 void ROM::init(std::string filename) {
     std::ifstream in(filename.c_str(), std::ios::binary);
     if (!in.is_open()) {
-        std::cout << "Can\'t Open File\n";
+        std::cout << "ROM::Can\'t Open File\n";
         in.close();
         exit(0);
     }
