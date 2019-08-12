@@ -27,7 +27,7 @@ Simple_Apu::Simple_Apu()
 
 	apu.output( &buf );
 	buf.clock_rate( 1789773 );
-	buf.sample_rate( 44100 );
+	buf.sample_rate( 44100, 1789773/29780 );
 
 	apu.reset(true, 0);
 	buf.clear();

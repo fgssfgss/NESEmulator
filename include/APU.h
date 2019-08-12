@@ -16,7 +16,7 @@ class APU {
 public:
     APU();
 
-	void init(const long sample_rate);
+    void init(const long sample_rate);
 
     uint8_t read(uint16_t address);
 
@@ -24,7 +24,7 @@ public:
 
     void stepFrame();
 
-	void step(void (*cb)(const blip_sample_t* samples, long count));
+    void step(void (*cb)(const blip_sample_t* samples, long count));
 
     ~APU();
 };

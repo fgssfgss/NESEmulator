@@ -12,7 +12,7 @@ void Console::init(std::string filename, const long sample_rate, void (*draw)(in
     apu = new APU();
     mem = new Memory();
     controller = new Controller();
-	apu->init(sample_rate);
+    apu->init(sample_rate);
     rom->init(filename);
     mem->init();
     cpu->init();
@@ -30,7 +30,7 @@ void Console::frame() {
 
 void Console::callVSync() {
     vsync();
-	getAPU()->stepFrame();
+    getAPU()->stepFrame();
 }
 
 void Console::putPixel(int x, int y, uint32_t color) {

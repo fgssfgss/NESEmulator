@@ -20,7 +20,7 @@ static SDL_Texture *texture;
 static pthread_t thread;
 static Uint32 vsyncEvent;
 static bool isRunning;
-static Sound_Queue* sound_queue;
+static Sound_Queue *sound_queue;
 
 static void play_samples(const blip_sample_t* samples, long count) {
 	sound_queue->write(samples, count);
@@ -28,7 +28,7 @@ static void play_samples(const blip_sample_t* samples, long count) {
 
 Emulator::Emulator(std::string _filename) : filename(move(_filename)) {
     SDL_Init(SDL_INIT_EVERYTHING);
-	SDL_SetHint(SDL_HINT_EMSCRIPTEN_KEYBOARD_ELEMENT, "#canvas");
+    SDL_SetHint(SDL_HINT_EMSCRIPTEN_KEYBOARD_ELEMENT, "#canvas");
     SDL_CreateWindowAndRenderer(SCREEN_WIDTH, SCREEN_HEIGHT, 0, &window, &renderer);
     SDL_SetWindowTitle(window, "NESEmulator");
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
@@ -37,8 +37,8 @@ Emulator::Emulator(std::string _filename) : filename(move(_filename)) {
                                 SCREEN_HEIGHT);
     SDL_RenderClear(renderer);
     vsyncEvent = SDL_RegisterEvents(1);
-	sound_queue = new Sound_Queue;
-	sound_queue->init(sample_rate);
+    sound_queue = new Sound_Queue;
+    sound_queue->init(sample_rate);
 #ifndef __EMSCRIPTEN__
     ticks = SDL_GetTicks();
 #endif
