@@ -3,14 +3,13 @@
 //
 
 #include "../include/Emulator.h"
-
 #include "../apu_emu/Sound_Queue.h"
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten/html5.h>
 #endif
 
-static const uint32_t idealFrameTime = ((1. / 50) * 1000);
+static const uint32_t idealFrameTime = ((1. / 60) * 1000);
 static const long sample_rate = 44100;
 static Uint32 ticks;
 static SDL_Window *window;
@@ -158,29 +157,29 @@ static EM_BOOL keyCallback(int eventType, const EmscriptenKeyboardEvent *event, 
 	Controller *controller = (Controller *)userData;
 	if (eventType == EMSCRIPTEN_EVENT_KEYDOWN) {
 		if (!states[Buttons::A] && event->keyCode == 90) {
-            states[Buttons::A] = true;
-        }
-        if (!states[Buttons::B] && event->keyCode == 65) {
-            states[Buttons::B] = true;
-        }
-        if (!states[Buttons::SELECT] && event->keyCode == 32) {
-        	states[Buttons::SELECT] = true;
-        }
-        if (!states[Buttons::START] && event->keyCode == 13) {
-        	states[Buttons::START] = true;
-        }
-        if (!states[Buttons::UP] && event->keyCode == 38) {
-        	states[Buttons::UP] = true;
-        }
-        if (!states[Buttons::DOWN] && event->keyCode == 40) {
-        	states[Buttons::DOWN] = true;
-        }
-        if (!states[Buttons::LEFT] && event->keyCode == 37) {
-        	states[Buttons::LEFT] = true;
-        }
-        if (!states[Buttons::RIGHT] && event->keyCode == 39) {
-        	states[Buttons::RIGHT] = true;
-        }
+			states[Buttons::A] = true;
+		}
+		if (!states[Buttons::B] && event->keyCode == 65) {
+			states[Buttons::B] = true;
+		}
+		if (!states[Buttons::SELECT] && event->keyCode == 32) {
+			states[Buttons::SELECT] = true;
+		}
+		if (!states[Buttons::START] && event->keyCode == 13) {
+			states[Buttons::START] = true;
+		}
+		if (!states[Buttons::UP] && event->keyCode == 38) {
+			states[Buttons::UP] = true;
+		}
+		if (!states[Buttons::DOWN] && event->keyCode == 40) {
+			states[Buttons::DOWN] = true;
+		}
+		if (!states[Buttons::LEFT] && event->keyCode == 37) {
+			states[Buttons::LEFT] = true;
+		}
+		if (!states[Buttons::RIGHT] && event->keyCode == 39) {
+			states[Buttons::RIGHT] = true;
+		}
 	} else if (eventType == EMSCRIPTEN_EVENT_KEYUP) {
 		if (states[Buttons::A] && event->keyCode == 90) {
 			states[Buttons::A] = false;
@@ -218,8 +217,8 @@ int Emulator::run() {
     c.init(filename, sample_rate, drawerFunc, vertSyncHandler);
     pthread_create(&thread, NULL, &mainLoop, NULL);
 #ifdef __EMSCRIPTEN__
-	emscripten_set_keydown_callback(NULL, c.getController(), true, keyCallback);
-	emscripten_set_keyup_callback(NULL, c.getController(), true, keyCallback);
+    emscripten_set_keydown_callback(NULL, c.getController(), true, keyCallback);
+    emscripten_set_keyup_callback(NULL, c.getController(), true, keyCallback);
     emscripten_set_main_loop(mainLoopStep, 0, 1);
 #else
     while(isRunning) {

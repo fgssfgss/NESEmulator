@@ -22,7 +22,7 @@ void Console::init(std::string filename, const long sample_rate, void (*draw)(in
 }
 
 void Console::frame() {
-	for (int i = 0; i < 106392; i++) {
+	for (int i = 0; i < 89341; i++) {
 		ppu->execute();
 		rom->execute();
 	}

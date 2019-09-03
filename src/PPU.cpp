@@ -21,6 +21,7 @@ PPU::PPU() {
     OAMADDR = 0x0;
     scanline = 240;
     cycle = 340;
+    cpu_cyc_count = 0;
     frame = 0;
     f = 0;
     nmiDelay = 0;
@@ -464,15 +465,16 @@ void PPU::nmiChange() {
 }
 
 void PPU::tick() {
-	cpu_cycles = 8;
-	if (mem->addCyclesAfterDMA == 513) { // kostyl, for better synchronization
-		cpu_cycles += mem->addCyclesAfterDMA;
-		mem->addCyclesAfterDMA = 0;
-	}
+        cpu_cycles = 8;
+        if (mem->addCyclesAfterDMA == 513) { // kostyl, for better synchronization
+            cpu_cycles += mem->addCyclesAfterDMA;
+            mem->addCyclesAfterDMA = 0;
+        }
 
-	if (cycle % cpu_cycles == 0) {
-		cpu_cycles = cpu->execute();
-	}
+        if (cycle % cpu_cycles == 0) {
+            cpu_cycles = cpu->execute();
+            cpu_cyc_count += cpu_cycles;
+        }
 
     if (nmiDelay > 0) {
         nmiDelay--;
@@ -494,6 +496,7 @@ void PPU::tick() {
     if (cycle > 340) {
         cycle = 0;
         scanline++;
+        cpu_cyc_count = 0;
         if (scanline > 261) {
             scanline = 0;
             frame++;

@@ -1136,7 +1136,7 @@ int CPU::execute() {
     PC++;
 
     if (instrTable[instr] != nullptr) {
-	    cycles = (this->*instrTable[instr])();
+        cycles = (this->*instrTable[instr])();
     } else {
     	cycles = 2;
     }
