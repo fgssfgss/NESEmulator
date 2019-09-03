@@ -51,15 +51,16 @@ void drawerFunc(int x, int y, uint32_t color) {
 
 void vertSyncHandler(void) {
     Uint32 frametime = SDL_GetTicks() - ticks;
-    if (frametime < idealFrameTime) {
-        SDL_Delay(idealFrameTime - frametime);
-    }
 
     if (vsyncEvent != ((Uint32) -1)) {
         SDL_Event event;
         SDL_memset(&event, 0, sizeof(event));
         event.type = vsyncEvent;
         SDL_PushEvent(&event);
+    }
+
+    if (frametime < idealFrameTime) {
+    	SDL_Delay(idealFrameTime - frametime);
     }
 
     ticks = SDL_GetTicks();

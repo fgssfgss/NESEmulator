@@ -118,7 +118,6 @@ private:
 
     int cycle;
     int cpu_cycles;
-    int cpu_cyc_count;
     int scanline;
     uint64_t frame;
     int mirroringType;

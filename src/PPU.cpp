@@ -21,7 +21,7 @@ PPU::PPU() {
     OAMADDR = 0x0;
     scanline = 240;
     cycle = 340;
-    cpu_cyc_count = 0;
+    cpu_cycles = 0;
     frame = 0;
     f = 0;
     nmiDelay = 0;
@@ -465,16 +465,13 @@ void PPU::nmiChange() {
 }
 
 void PPU::tick() {
-        cpu_cycles = 8;
-        if (mem->addCyclesAfterDMA == 513) { // kostyl, for better synchronization
-            cpu_cycles += mem->addCyclesAfterDMA;
-            mem->addCyclesAfterDMA = 0;
-        }
-
-        if (cycle % cpu_cycles == 0) {
-            cpu_cycles = cpu->execute();
-            cpu_cyc_count += cpu_cycles;
-        }
+    if (mem->addCyclesAfterDMA > 0) {
+	mem->addCyclesAfterDMA--;
+    } else {
+	if (cpu_cycles-- == 0) {
+	    cpu_cycles = cpu->execute();
+	}
+    }
 
     if (nmiDelay > 0) {
         nmiDelay--;
@@ -496,7 +493,6 @@ void PPU::tick() {
     if (cycle > 340) {
         cycle = 0;
         scanline++;
-        cpu_cyc_count = 0;
         if (scanline > 261) {
             scanline = 0;
             frame++;
@@ -540,6 +536,7 @@ int PPU::execute() {
                     fetchHighTileByte();
                     break;
                 case 0:
+	            incrementX();
                     storeTileData();
                     break;
             }
@@ -548,9 +545,6 @@ int PPU::execute() {
             copyY();
         }
         if (renderLine) {
-            if (fetchCycle && ((cycle % 8) == 0)) {
-                incrementX();
-            }
             if (cycle == 256) {
                 incrementY();
             }
@@ -560,13 +554,11 @@ int PPU::execute() {
         }
     }
 
-    if (renderingEnabled) {
-        if (cycle == 257) {
-            if (visibleLine) {
-                evaluateSprites();
-            } else {
-                spriteCount = 0;
-            }
+    if (renderingEnabled && cycle == 257) {
+        if (visibleLine) {
+            evaluateSprites();
+        } else {
+            spriteCount = 0;
         }
     }
 
