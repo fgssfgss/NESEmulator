@@ -5,36 +5,24 @@
 #include <SDL_timer.h>
 #include "../include/Console.h"
 
-void Console::init(std::string filename, const long sample_rate, void (*draw)(int, int, uint32_t), void (*vsync)()) {
+void Console::init(std::string filename, const long sample_rate) {
     rom = new ROM();
-    ppu = new PPU();
-    cpu = new CPU();
     apu = new APU();
+    ppu = new PPU(apu);
+    cpu = new CPU();
     mem = new Memory();
     controller = new Controller();
     apu->init(sample_rate);
-    rom->init(filename);
+    rom->init(std::move(filename));
     mem->init();
     cpu->init();
     ppu->init();
-    this->draw = draw;
-    this->vsync = vsync;
 }
 
 void Console::frame() {
-	for (int i = 0; i < 89341; i++) {
-		ppu->execute();
-		rom->execute();
-	}
-}
-
-void Console::callVSync() {
-    vsync();
-    getAPU()->stepFrame();
-}
-
-void Console::putPixel(int x, int y, uint32_t color) {
-    draw(x, y, color);
+    for (int i = 0; i < 89341; i++) {
+        ppu->execute();
+    }
 }
 
 Controller *Console::getController() {

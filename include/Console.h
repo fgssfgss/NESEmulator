@@ -31,11 +31,7 @@ public:
 
     void frame();
 
-    void putPixel(int x, int y, uint32_t color);
-
-    void callVSync();
-
-    void init(std::string filename, const long sample_rate, void (*draw)(int, int, uint32_t), void (*vsync)(void));
+    void init(std::string filename, const long sample_rate);
 
     CPU *getCPU();
 
@@ -57,9 +53,6 @@ private:
     Console(Console const &) = delete;
 
     Console &operator=(Console const &) = delete;
-
-    void (*draw)(int, int, uint32_t);
-    void (*vsync)(void);
 
     CPU *cpu;
     Memory *mem;

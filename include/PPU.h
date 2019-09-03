@@ -13,6 +13,7 @@
 
 class CPU;
 class Memory;
+class APU;
 
 enum FlagsCTRL {
     flagNameTable = 3,
@@ -43,7 +44,7 @@ enum FlagsSTATUS {
 
 class PPU {
 public:
-    PPU();
+    PPU(APU *_apu);
 
     void Reset();
 
@@ -56,8 +57,6 @@ public:
     uint8_t ReadRam(uint16_t addr);
 
     uint8_t *getOAMRAM();
-
-    void getCycleScanlineRendering(int &_cycle, int &_scanline, bool &isRendering);
 
     void WriteRam(uint16_t addr, uint8_t value);
 
@@ -162,6 +161,7 @@ private:
 
     ROM *rom;
     CPU *cpu;
+    APU *apu;
     Memory *mem;
 };
 

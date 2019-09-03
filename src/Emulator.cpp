@@ -215,7 +215,7 @@ static EM_BOOL keyCallback(int eventType, const EmscriptenKeyboardEvent *event, 
 int Emulator::run() {
     isRunning = true;
     Console &c = Console::Instance();
-    c.init(filename, sample_rate, drawerFunc, vertSyncHandler);
+    c.init(filename, sample_rate);
     pthread_create(&thread, NULL, &mainLoop, NULL);
 #ifdef __EMSCRIPTEN__
     emscripten_set_keydown_callback(NULL, c.getController(), true, keyCallback);

@@ -21,14 +21,8 @@ void Memory::init() {
 
 uint8_t Memory::Read8(uint16_t addr) {
     // https://wiki.nesdev.com/w/index.php/CPU_memory_map
-    if (addr >= 0 && addr <= 0x07FF) {
-        return ram[addr];
-    } else if (addr >= 0x0800 && addr <= 0x0FFF) {
-        return ram[addr - 0x0800];
-    } else if (addr >= 0x1000 && addr <= 0x17FF) {
-        return ram[addr - 0x1000];
-    } else if (addr >= 0x1800 && addr <= 0x1FFF) {
-        return ram[addr - 0x1800];
+    if (addr >= 0 && addr <= 0x1FFF) {
+        return ram[addr % 0x0800];
     } else if (addr >= 0x2000 && addr <= 0x3FFF) {
         return ppu->Read((addr - 0x2000) % 8);
     } else if (addr >= 0x4000 && addr <= 0x4017) {
@@ -57,14 +51,8 @@ uint16_t Memory::Read16(uint16_t addr) {
 }
 
 void Memory::Write8(uint16_t addr, uint8_t value) {
-    if (addr >= 0 && addr <= 0x07FF) {
-        ram[addr] = value;
-    } else if (addr >= 0x0800 && addr <= 0x0FFF) {
-        ram[addr - 0x0800] = value;
-    } else if (addr >= 0x1000 && addr <= 0x17FF) {
-        ram[addr - 0x1000] = value;
-    } else if (addr >= 0x1800 && addr <= 0x1FFF) {
-        ram[addr - 0x1800] = value;
+    if (addr >= 0 && addr <= 0x1FFF) {
+        ram[addr % 0x0800] = value;
     } else if (addr >= 0x2000 && addr <= 0x3FFF) {
         ppu->Write(addr % 8, value);
     } else if (addr >= 0x4000 && addr <= 0x4017) {

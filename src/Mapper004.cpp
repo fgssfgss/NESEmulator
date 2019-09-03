@@ -21,19 +21,6 @@ Mapper004::~Mapper004() {
 }
 
 void Mapper004::execute() {
-    int cycle, scanline;
-    bool render;
-    Console &c = Console::Instance();
-    c.getPPU()->getCycleScanlineRendering(cycle, scanline, render);
-    if (cycle == 280) {
-        return;
-    }
-    if (scanline > 239 && scanline < 261) {
-        return;
-    }
-    if (render) {
-        return;
-    }
     handleScanline();
 }
 

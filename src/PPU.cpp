@@ -4,15 +4,16 @@
 
 #include "../include/PPU.h"
 
-PPU::PPU() {
+extern void drawerFunc(int x, int y, uint32_t color);
+extern void vertSyncHandler(void);
+
+PPU::PPU(APU *_apu) : apu(_apu), rom(nullptr) {
     memset(ram, 0xff, sizeof(ram));
     memset(oamram, 0xff, sizeof(oamram));
     memset(spritePositions, 0x00, sizeof(spritePositions));
     memset(spritePriorities, 0x00, sizeof(spritePriorities));
     memset(spritePatterns, 0x00, sizeof(spritePatterns));
     memset(spriteIndexes, 0x00, sizeof(spriteIndexes));
-
-    rom = NULL;
 
     dummy_reg = 0;
     PPUCTRL = 0x0;
@@ -61,6 +62,7 @@ void PPU::init() { // for NMI
     cpu = c.getCPU();
     rom = c.getROM();
     mem = c.getMemory();
+    apu = c.getAPU();
 }
 
 PPU::~PPU() {
@@ -347,8 +349,7 @@ void PPU::renderPixel() {
         }
     }
 
-    Console &c = Console::Instance();
-    c.putPixel(x, y, palette[readPalette(color) % 64]);
+    drawerFunc(x, y, palette[readPalette(color) % 64]);
 }
 
 uint8_t PPU::readPalette(uint16_t addr) {
@@ -443,8 +444,8 @@ void PPU::evaluateSprites() {
 }
 
 void PPU::setVSync() {
-    Console &c = Console::Instance();
-    c.callVSync();
+    vertSyncHandler();
+    apu->stepFrame();
     PPUSTATUS |= flagNmiOccured;
     nmiChange();
 }
@@ -560,6 +561,10 @@ int PPU::execute() {
         }
     }
 
+    if (!renderingEnabled && !(scanline > 239 && scanline < 261) && cycle != 280) {
+    	rom->execute();
+    }
+
     if (scanline == 241 && cycle == 1) {
         setVSync();
     }
@@ -571,10 +576,4 @@ int PPU::execute() {
     }
 
     return frame;
-}
-
-void PPU::getCycleScanlineRendering(int &_cycle, int &_scanline, bool &isRendering) {
-    _cycle = cycle;
-    _scanline = scanline;
-    isRendering = ((PPUMASK & flagShowBackground) && (PPUMASK & flagShowSprites));
 }
