@@ -44,8 +44,6 @@ public:
 
     void execute();
 
-    uint8_t MirroringStatus();
-
 private:
     struct FileHeader header;
     IMapper *mapper;

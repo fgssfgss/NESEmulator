@@ -61,8 +61,6 @@ void PPU::init() { // for NMI
     cpu = c.getCPU();
     rom = c.getROM();
     mem = c.getMemory();
-
-    mirroringType = rom->MirroringStatus(); // setting initial mapping vram banks
 }
 
 PPU::~PPU() {
@@ -501,12 +499,12 @@ void PPU::tick() {
     }
 }
 
+void PPU::setMirroring(int mirroring) {
+    mirroringType = mirroring;
+}
+
 int PPU::execute() {
     tick();
-
-    if (mirroringType != rom->MirroringStatus()) {
-        mirroringType = rom->MirroringStatus();
-    }
 
     bool renderingEnabled = ((PPUMASK & flagShowBackground) || (PPUMASK & flagShowSprites));
     bool preLine = (scanline == 261);

@@ -105,6 +105,8 @@ public:
 
     int execute(); // one cycle
 
+    void setMirroring(int mirroring);
+
     ~PPU();
 
 private:

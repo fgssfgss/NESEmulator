@@ -17,7 +17,6 @@ public:
     void execute();
     uint32_t mapToROM(uint16_t addr);
     uint32_t mapToVROM(uint16_t addr);
-    int mirroringStatus();
     void writeHandler(uint16_t addr, uint8_t value);
 private:
     struct FileHeader *params;

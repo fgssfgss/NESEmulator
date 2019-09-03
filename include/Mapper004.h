@@ -22,8 +22,6 @@ public:
 
     uint32_t mapToVROM(uint16_t addr);
 
-    int mirroringStatus();
-
     void writeHandler(uint16_t addr, uint8_t value);
 
 private:
@@ -41,7 +39,6 @@ private:
     uint8_t vrommode;
     uint8_t reloadVal = 0;
     uint8_t counter = 0;
-    bool mirroring;
     uint32_t ROMBanks[4];
     uint32_t VROMBanks[8];
     uint8_t reg;

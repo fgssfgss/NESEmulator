@@ -45,10 +45,6 @@ ROM::ROM() {
 ROM::~ROM() {
 }
 
-uint8_t ROM::MirroringStatus() {
-    return mapper->mirroringStatus(); // 0: vertical/horizontal, 1: horizontal/vertical
-}
-
 void ROM::execute() {
     mapper->execute();
 }

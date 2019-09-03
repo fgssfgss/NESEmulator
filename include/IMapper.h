@@ -13,7 +13,6 @@
 
 class IMapper {
 public:
-    virtual int mirroringStatus() = 0;
     virtual void execute() = 0; // need for irq, which mapper can invoke
     virtual uint32_t mapToROM(uint16_t addr) = 0; // maps address from NES Addressing to INES format rom
     virtual uint32_t mapToVROM(uint16_t addr) = 0; // maps address from NES Addressing to INES format vrom

@@ -3,9 +3,12 @@
 //
 
 #include "../include/Mapper000.h"
+#include "../include/Console.h"
 
 Mapper000::Mapper000(struct FileHeader *_header) {
     params = _header;
+    Console &c = Console::Instance();
+    c.getPPU()->setMirroring(_header->flagsPPUDetails & 1);
 }
 
 Mapper000::~Mapper000() {
@@ -25,10 +28,6 @@ uint32_t Mapper000::mapToROM(uint16_t addr) {
 
 uint32_t Mapper000::mapToVROM(uint16_t addr) {
     return addr;
-}
-
-int Mapper000::mirroringStatus() {
-    return params->flagsPPUDetails & 1;
 }
 
 void Mapper000::writeHandler(uint16_t addr, uint8_t value) {

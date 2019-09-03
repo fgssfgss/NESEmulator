@@ -8,7 +8,8 @@
 
 Mapper004::Mapper004(struct FileHeader *_header) {
     params = _header;
-    mirroring = (params->flagsPPUDetails & 1);
+    Console &c = Console::Instance();
+    c.getPPU()->setMirroring(_header->flagsPPUDetails & 1);
     ROMBanks[0] = calcRBankOffset(0);
     ROMBanks[1] = calcRBankOffset(1);
     ROMBanks[2] = calcRBankOffset(-2);
@@ -48,10 +49,6 @@ uint32_t Mapper004::mapToVROM(uint16_t addr) {
     return VROMBanks[bank] + offset;
 }
 
-int Mapper004::mirroringStatus() {
-    return mirroring;
-}
-
 void Mapper004::writeHandler(uint16_t addr, uint8_t value) {
     if (addr >= 0x8000 && addr <= 0x9FFE && addr % 2 == 0) {
         rommode = ((value >> 6) & 1);
@@ -62,7 +59,8 @@ void Mapper004::writeHandler(uint16_t addr, uint8_t value) {
         regs[reg] = value;
         switchBanks();
     } else if (addr >= 0xA000 && addr <= 0xBFFE && addr % 2 == 0) {
-        mirroring = (value & 1);
+	Console &c = Console::Instance();
+	c.getPPU()->setMirroring(value & 1);
     } else if (addr >= 0xA001 && addr <= 0xBFFF && addr % 2 == 1) {
         // ram protect(do we need this right now?)
     } else if (addr >= 0xC000 && addr <= 0xDFFE && addr % 2 == 0) {
