@@ -24,7 +24,7 @@ public:
 
     void stepFrame();
 
-    void step(void (*cb)(const blip_sample_t* samples, long count));
+    void step();
 
     ~APU();
 };

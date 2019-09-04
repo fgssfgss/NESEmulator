@@ -21,7 +21,7 @@ static Uint32 vsyncEvent;
 static bool isRunning;
 static Sound_Queue *sound_queue;
 
-static void play_samples(const blip_sample_t* samples, long count) {
+void play_samples(const blip_sample_t* samples, int count) {
 	sound_queue->write(samples, count);
 }
 
@@ -38,9 +38,7 @@ Emulator::Emulator(std::string _filename) : filename(move(_filename)) {
     vsyncEvent = SDL_RegisterEvents(1);
     sound_queue = new Sound_Queue;
     sound_queue->init(sample_rate);
-#ifndef __EMSCRIPTEN__
     ticks = SDL_GetTicks();
-#endif
 }
 
 void drawerFunc(int x, int y, uint32_t color) {
@@ -78,7 +76,6 @@ void mainLoopStep() {
     SDL_Event event;
     static bool states[8] = {false, false, false, false, false, false, false, false};
     Console &c = Console::Instance();
-    c.getAPU()->step(play_samples);
     if (SDL_PollEvent(&event)) {
         if (event.type == vsyncEvent) {
             SDL_UpdateTexture(texture, NULL, surface->pixels, surface->pitch);
@@ -148,6 +145,7 @@ void mainLoopStep() {
         c.getController()->setButtons(states);
 #endif
     }
+    c.getAPU()->step();
 }
 
 #ifdef __EMSCRIPTEN__

@@ -7,6 +7,8 @@
 
 static Simple_Apu *apu;
 
+extern void play_samples(const blip_sample_t* samples, int count);
+
 static int read_dmc(void* _, cpu_addr_t addr) {
 	Console &c = Console::Instance();
 	return (int)c.getMemory()->Read8(addr);
@@ -43,12 +45,12 @@ void APU::stepFrame() {
 	apu->end_frame();
 }
 
-void APU::step(void (*cb)(const blip_sample_t* samples, long count)) {
+void APU::step() {
 	const int buf_size = 2048;
 	static blip_sample_t buf[buf_size];
 
-	long count = apu->read_samples(buf, buf_size);
-	cb(buf, count);
+	int count = apu->read_samples(buf, buf_size);
+	play_samples(buf, count);
 }
 
 APU::~APU() {

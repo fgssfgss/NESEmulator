@@ -458,7 +458,7 @@ void PPU::clearVSync() {
 void PPU::nmiChange() {
     bool was = ((PPUSTATUS & flagNmiOccured) && (PPUCTRL & flagNmi));
     if (was && !prevNmi) {
-        nmiDelay = 15;
+        nmiDelay = 20;
     }
     prevNmi = was;
 }
