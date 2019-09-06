@@ -444,8 +444,9 @@ void PPU::evaluateSprites() {
 }
 
 void PPU::setVSync() {
-    vertSyncHandler();
     apu->stepFrame();
+    apu->step();
+    vertSyncHandler();
     PPUSTATUS |= flagNmiOccured;
     nmiChange();
 }
@@ -464,14 +465,6 @@ void PPU::nmiChange() {
 }
 
 void PPU::tick() {
-    if (mem->addCyclesAfterDMA > 0) {
-	mem->addCyclesAfterDMA--;
-    } else {
-	if (cpu_cycles-- == 0) {
-	    cpu_cycles = cpu->execute();
-	}
-    }
-
     if (nmiDelay > 0) {
         nmiDelay--;
         if (nmiDelay == 0 && (PPUCTRL & flagNmi) && (PPUSTATUS & flagNmiOccured)) {

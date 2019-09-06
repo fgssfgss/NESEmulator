@@ -20,9 +20,28 @@ void Console::init(std::string filename, const long sample_rate) {
 }
 
 void Console::frame() {
-    for (int i = 0; i < 89341; i++) {
-        ppu->execute();
+    int prev_frame = 0;
+    int frame = 0;
+    int frame_chg = 0;
+    int cpu_cycles = 0;
+
+    long cpu_c = getCPU()->getTotalCycles();
+
+    for (int i = 0; i < 89341; ++i) {
+    	if (cpu_cycles < 29780 && i % 3 == 0) {
+            cpu_cycles += cpu->execute();
+    	}
+
+    	prev_frame = frame;
+    	frame = ppu->execute();
+    	if (prev_frame != frame) {
+	        frame_chg++;
+    	}
     }
+
+    getAPU()->step();
+
+    std::cout << "frame changed " << frame_chg << " cpu cycles is " << getCPU()->getTotalCycles() - cpu_c << std::endl;
 }
 
 Controller *Console::getController() {

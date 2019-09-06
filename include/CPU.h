@@ -26,6 +26,8 @@ public:
 
     void IRQ();
 
+    long getTotalCycles() { return total_cycles; }
+
 protected:
 private:
     Memory *m;
@@ -335,6 +337,8 @@ private:
     void TYA();
 
     int cycles = 0;
+    long hz = 0;
+    long total_cycles = 0;
 
     // registers
     uint16_t PC;

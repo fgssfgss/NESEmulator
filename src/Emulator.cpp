@@ -145,7 +145,6 @@ void mainLoopStep() {
         c.getController()->setButtons(states);
 #endif
     }
-    c.getAPU()->step();
 }
 
 #ifdef __EMSCRIPTEN__
