@@ -16,7 +16,7 @@ class APU {
 public:
     APU();
 
-    void init(const long sample_rate);
+    void init();
 
     uint8_t read(uint16_t address);
 

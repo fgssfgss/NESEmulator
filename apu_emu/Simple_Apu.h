@@ -23,9 +23,6 @@ public:
 
 	void irq_notifier( void (*func)( void* user_data ), void* user_data );
 	
-	// Set output sample rate
-	blargg_err_t sample_rate( long rate );
-	
 	// Write to register (0x4000-0x4017, except 0x4014 and 0x4016)
 	void write_register( cpu_addr_t, int data );
 	

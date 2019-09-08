@@ -49,11 +49,6 @@ void Simple_Apu::irq_notifier( void (*func)( void* user_data ), void* user_data 
 	apu.irq_notifier(func, user_data);
 }
 
-blargg_err_t Simple_Apu::sample_rate( long rate )
-{
-
-}
-
 void Simple_Apu::write_register( cpu_addr_t addr, int data )
 {
 	apu.write_register( clock(), addr, data );

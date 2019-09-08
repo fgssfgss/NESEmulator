@@ -23,8 +23,7 @@ APU::APU() {
 	apu = new Simple_Apu;
 }
 
-void APU::init(const long sample_rate) {
-	apu->sample_rate(sample_rate);
+void APU::init() {
 	apu->dmc_reader(read_dmc, NULL);
 	apu->irq_notifier(irq_handle, NULL);
 }

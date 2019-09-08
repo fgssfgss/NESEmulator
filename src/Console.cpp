@@ -5,14 +5,14 @@
 #include <SDL_timer.h>
 #include "../include/Console.h"
 
-void Console::init(std::string filename, const long sample_rate) {
+void Console::init(std::string filename) {
     rom = new ROM();
     apu = new APU();
     ppu = new PPU(apu);
     cpu = new CPU();
     mem = new Memory();
     controller = new Controller();
-    apu->init(sample_rate);
+    apu->init();
     rom->init(std::move(filename));
     mem->init();
     cpu->init();
@@ -41,7 +41,7 @@ void Console::frame() {
 
     getAPU()->step();
 
-    std::cout << "frame changed " << frame_chg << " cpu cycles is " << getCPU()->getTotalCycles() - cpu_c << std::endl;
+    //std::cout << "frame changed " << frame_chg << " cpu cycles is " << getCPU()->getTotalCycles() - cpu_c << std::endl;
 }
 
 Controller *Console::getController() {

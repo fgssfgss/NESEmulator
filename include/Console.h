@@ -31,7 +31,7 @@ public:
 
     void frame();
 
-    void init(std::string filename, const long sample_rate);
+    void init(std::string filename);
 
     CPU *getCPU();
 
