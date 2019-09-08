@@ -54,6 +54,8 @@ private:
 
     Console &operator=(Console const &) = delete;
 
+    int timing_helper = 0;
+
     CPU *cpu;
     Memory *mem;
     ROM *rom;

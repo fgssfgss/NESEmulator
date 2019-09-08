@@ -6,6 +6,7 @@
 #include "../include/Console.h"
 
 void Console::init(std::string filename) {
+    timing_helper = 0;
     rom = new ROM();
     apu = new APU();
     ppu = new PPU(apu);
@@ -20,28 +21,18 @@ void Console::init(std::string filename) {
 }
 
 void Console::frame() {
-    int prev_frame = 0;
-    int frame = 0;
-    int frame_chg = 0;
     int cpu_cycles = 0;
+    timing_helper ^= 1;
 
-    long cpu_c = getCPU()->getTotalCycles();
-
-    for (int i = 0; i < 89341; ++i) {
-    	if (cpu_cycles < 29780 && i % 3 == 0) {
+    for (int i = 0; i < 89341 + timing_helper; ++i) {
+    	if ((cpu_cycles <= (29780 + timing_helper)) && i % 3 == 0) {
             cpu_cycles += cpu->execute();
     	}
 
-    	prev_frame = frame;
-    	frame = ppu->execute();
-    	if (prev_frame != frame) {
-	        frame_chg++;
-    	}
+    	ppu->execute();
     }
 
     getAPU()->step();
-
-    //std::cout << "frame changed " << frame_chg << " cpu cycles is " << getCPU()->getTotalCycles() - cpu_c << std::endl;
 }
 
 Controller *Console::getController() {

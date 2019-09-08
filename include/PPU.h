@@ -163,6 +163,7 @@ private:
     CPU *cpu;
     APU *apu;
     Memory *mem;
+    long ticker = 0;
 };
 
 
