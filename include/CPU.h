@@ -26,7 +26,7 @@ public:
 
     void IRQ();
 
-    long getTotalCycles() { return total_cycles; }
+    long getLeftOverCycles() { return total_cycles; }
 
 protected:
 private:

@@ -1133,15 +1133,15 @@ int CPU::instrINC0xfe() {
 
 
 int CPU::execute() {
-	uint8_t instr = m->Read8(PC);
-	PC++;
+	uint8_t instr = m->Read8(PC++);
 	cycles = 0;
+
 	if (instrTable[instr] != nullptr) {
 		cycles += (this->*instrTable[instr])();
 	} else {
 		cycles += 2;
 	}
-	total_cycles += cycles;
+
 	if (m->addCyclesAfterDMA > 0) {
 		cycles += m->addCyclesAfterDMA;
 		m->addCyclesAfterDMA = 0;

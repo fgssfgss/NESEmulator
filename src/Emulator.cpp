@@ -4,6 +4,7 @@
 
 #include "../include/Emulator.h"
 #include "../apu_emu/Sound_Queue.h"
+#include <thread>
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten/html5.h>
@@ -16,7 +17,7 @@ static SDL_Window *window;
 static SDL_Renderer *renderer;
 static SDL_Surface *surface;
 static SDL_Texture *texture;
-static pthread_t thread;
+static std::thread thread;
 static Uint32 vsyncEvent;
 static bool isRunning;
 static Sound_Queue *sound_queue;
@@ -64,12 +65,11 @@ void vertSyncHandler(void) {
     ticks = SDL_GetTicks();
 }
 
-void *mainLoop(void *arg) {
+void mainLoop() {
     Console &c = Console::Instance();
     while (isRunning) {
 	    c.frame();
     }
-    return arg;
 }
 
 void mainLoopStep() {
@@ -213,7 +213,7 @@ int Emulator::run() {
     isRunning = true;
     Console &c = Console::Instance();
     c.init(filename);
-    pthread_create(&thread, NULL, &mainLoop, NULL);
+    thread = std::thread([&]() { mainLoop(); });
 #ifdef __EMSCRIPTEN__
     emscripten_set_keydown_callback(NULL, c.getController(), true, keyCallback);
     emscripten_set_keyup_callback(NULL, c.getController(), true, keyCallback);
@@ -228,7 +228,7 @@ int Emulator::run() {
 }
 
 Emulator::~Emulator() {
-    pthread_join(thread, NULL);
+    thread.join();
     delete sound_queue;
     SDL_FreeSurface(surface);
     SDL_DestroyWindow(window);

@@ -55,6 +55,7 @@ private:
     Console &operator=(Console const &) = delete;
 
     int timing_helper = 0;
+    int leftover_cycles = 0;
 
     CPU *cpu;
     Memory *mem;

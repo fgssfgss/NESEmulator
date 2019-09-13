@@ -16,7 +16,6 @@
 #include <sstream>
 #include <iomanip>
 #include <cstdlib>
-#include <pthread.h>
 
 #ifdef EMSCRIPTEN_BUILD
 #include <emscripten.h>

@@ -444,10 +444,7 @@ void PPU::evaluateSprites() {
 }
 
 void PPU::setVSync() {
-    apu->stepFrame();
-    apu->step();
     vertSyncHandler();
-    std::cout << "ticker is " << ticker << std::endl;
     ticker = 0;
     PPUSTATUS |= flagNmiOccured;
     nmiChange();

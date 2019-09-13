@@ -24,15 +24,18 @@ void Console::frame() {
     int cpu_cycles = 0;
     timing_helper ^= 1;
 
-    for (int i = 0; i < 89341 + timing_helper; ++i) {
-    	if ((cpu_cycles <= (29780 + timing_helper)) && i % 3 == 0) {
-            cpu_cycles += cpu->execute();
-    	}
+    for (int i = 0; i < 89341 + timing_helper;) {
+        cpu_cycles = cpu->execute();
 
-    	ppu->execute();
+        i += cpu_cycles * 3;
+
+        for (int j = 0; j < (cpu_cycles * 3); ++j) {
+            ppu->execute();
+        }
     }
 
     getAPU()->step();
+    getAPU()->stepFrame();
 }
 
 Controller *Console::getController() {

@@ -6,11 +6,10 @@ int main(int argc, char *argv[]) {
         std::cout << "USAGE: " << argv[0] << " filename.nes" << std::endl;
         return 1;
     }
-    Emulator *emu = new Emulator(argv[1]);
+    Emulator emu(argv[1]);
 #else
-    Emulator *emu = new Emulator("game.nes");
+    Emulator emu("game.nes");
 #endif
-    int ret = emu->run();
-    delete emu;
+    int ret = emu.run();
     return ret;
 }
