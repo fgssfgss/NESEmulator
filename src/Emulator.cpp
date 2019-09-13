@@ -67,6 +67,12 @@ void vertSyncHandler(void) {
 
 void mainLoop() {
     Console &c = Console::Instance();
+
+#ifdef __EMSCRIPTEN__
+    c.getCPU()->execute();
+    c.getCPU()->execute();
+#endif
+
     while (isRunning) {
 	    c.frame();
     }

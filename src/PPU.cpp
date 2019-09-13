@@ -445,7 +445,6 @@ void PPU::evaluateSprites() {
 
 void PPU::setVSync() {
     vertSyncHandler();
-    ticker = 0;
     PPUSTATUS |= flagNmiOccured;
     nmiChange();
 }
@@ -464,8 +463,6 @@ void PPU::nmiChange() {
 }
 
 void PPU::tick() {
-    ticker++;
-
     if (nmiDelay > 0) {
         nmiDelay--;
         if (nmiDelay == 0 && (PPUCTRL & flagNmi) && (PPUSTATUS & flagNmiOccured)) {

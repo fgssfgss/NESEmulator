@@ -31,6 +31,8 @@ public:
 
     void frame();
 
+    int step();
+
     void init(std::string filename);
 
     CPU *getCPU();
@@ -54,8 +56,7 @@ private:
 
     Console &operator=(Console const &) = delete;
 
-    int timing_helper = 0;
-    int leftover_cycles = 0;
+    int prev_frame = 0;
 
     CPU *cpu;
     Memory *mem;

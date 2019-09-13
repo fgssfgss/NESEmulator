@@ -6,7 +6,7 @@
 #include "../include/Console.h"
 
 void Console::init(std::string filename) {
-    timing_helper = 0;
+    prev_frame = 0;
     rom = new ROM();
     apu = new APU();
     ppu = new PPU(apu);
@@ -20,19 +20,23 @@ void Console::init(std::string filename) {
     ppu->init();
 }
 
-void Console::frame() {
-    int cpu_cycles = 0;
-    timing_helper ^= 1;
-
-    for (int i = 0; i < 89341 + timing_helper;) {
-        cpu_cycles = cpu->execute();
-
-        i += cpu_cycles * 3;
-
-        for (int j = 0; j < (cpu_cycles * 3); ++j) {
-            ppu->execute();
-        }
+int Console::step() {
+    int frame = 0;
+    int cpu_cycles = cpu->execute();
+    for (int i = 0; i < (3*cpu_cycles); ++i) {
+    	frame = ppu->execute();
     }
+    return frame;
+}
+
+void Console::frame() {
+    int frame = 0;
+
+    do {
+        frame = step();
+    } while (prev_frame == frame);
+
+    prev_frame = frame;
 
     getAPU()->step();
     getAPU()->stepFrame();
