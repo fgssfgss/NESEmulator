@@ -221,8 +221,8 @@ int Emulator::run() {
     c.init(filename);
     thread = std::thread([&]() { mainLoop(); });
 #ifdef __EMSCRIPTEN__
-    emscripten_set_keydown_callback(NULL, c.getController(), true, keyCallback);
-    emscripten_set_keyup_callback(NULL, c.getController(), true, keyCallback);
+    emscripten_set_keydown_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, c.getController(), true, keyCallback);
+    emscripten_set_keyup_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, c.getController(), true, keyCallback);
     emscripten_set_main_loop(mainLoopStep, 0, 1);
 #else
     while(isRunning) {

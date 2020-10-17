@@ -8,6 +8,7 @@
       .emscripten { padding-right: 0; margin-left: auto; margin-right: auto; display: block; }
       textarea.emscripten { font-family: monospace; width: 80%; }
       div.emscripten { text-align: center; }
+      div.emscripten_uploader { text-align: center; }
       div.emscripten_border { border: 1px solid black; }
       /* the canvas *must not* have any border or padding, or mouse coords will be wrong */
       canvas.emscripten { border: 0px none; background-color: black; }
@@ -57,6 +58,11 @@
       <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()"></canvas>
     </div>
     <hr/>
+    <div class="emscripten_uploader">
+        <input type="file" id="emscripten_upload_file" onchange="load_file()">
+        File to upload
+        </input>
+    </div>
     <hr/>
     <textarea class="emscripten" id="output" rows="8"></textarea>
     <hr>
@@ -64,6 +70,8 @@
       var statusElement = document.getElementById('status');
       var progressElement = document.getElementById('progress');
       var spinnerElement = document.getElementById('spinner');
+      let reader = new FileReader(); 
+      let readiness = 0;
 
       var Module = {
         preRun: (function() {
@@ -156,6 +164,26 @@
           if (text) Module.printErr('[post-exception status] ' + text);
         };
       };
+
+      function load_file () {
+          let files = document.getElementById('emscripten_upload_file').files;
+          let file = files[0];
+
+          reader.addEventListener('loadend', save_file);
+          reader.readAsArrayBuffer(file);
+      }
+
+      function save_file () {
+          let result = reader.result;
+          const byte_view = new Uint8Array(result);
+
+          FS.writeFile('game.nes', byte_view);
+          console.log('File uploaded!');
+          readiness = 1;
+      }
+      function isReady () {
+          return readiness;
+      }
     </script>
     {{{ SCRIPT }}}
   </body>
