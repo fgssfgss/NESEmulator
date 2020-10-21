@@ -73,6 +73,7 @@
       let reader = new FileReader();
 
       var Module = {
+        'noInitialRun': true,
         preRun: (function() {
           function resumeAudio(e) {
 	      if (typeof Module === 'undefined'
@@ -178,15 +179,10 @@
 
           FS.writeFile('game.nes', byte_view);
           console.log('File uploaded!');
-
-          start_emu();
+                                         
+          callMain();
       }
 
-      function start_emu () {
-          var result = Module.ccall('start_main',
-          'number',
-          [], []);
-      }                                       
     </script>
     {{{ SCRIPT }}}
   </body>
