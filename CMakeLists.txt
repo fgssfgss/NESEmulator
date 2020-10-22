@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 project(NESEmulator)
 
 if (EMSCRIPTEN)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DEMSCRIPTEN_BUILD -s FORCE_FILESYSTEM=1 -r -std=c++11 -s USE_SDL=2 -s USE_PTHREADS=1 -O3 -finline-functions -Wno-unused-value")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s WASM=2 -DEMSCRIPTEN_BUILD -s FORCE_FILESYSTEM=1 -r -std=c++11 -s USE_SDL=2 -s USE_PTHREADS=1 -O3 -finline-functions -Wno-unused-value")
     set(CMAKE_EXECUTABLE_SUFFIX ".bc")
 else()
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${NESEmulator_SOURCE_DIR}/cmake")
@@ -19,7 +19,7 @@ add_executable(NESEmulator ${SOURCE_FILES} $<TARGET_OBJECTS:apu_emu>)
 
 if (EMSCRIPTEN)
     add_custom_command(TARGET NESEmulator
-        COMMAND ${CMAKE_CXX_COMPILER} -O3 -o index.html ${CMAKE_CURRENT_BINARY_DIR}/NESEmulator.bc -s FORCE_FILESYSTEM=1 -s USE_SDL=2 -s USE_PTHREADS=1 --shell-file "${NESEmulator_SOURCE_DIR}/emscripten_page.html"
+        COMMAND ${CMAKE_CXX_COMPILER} -O3 -o index.html ${CMAKE_CURRENT_BINARY_DIR}/NESEmulator.bc -s WASM=2 -s FORCE_FILESYSTEM=1 -s USE_SDL=2 -s USE_PTHREADS=1 --shell-file "${NESEmulator_SOURCE_DIR}/emscripten_page.html"
                        POST_BUILD
                        COMMENT "Creating HTML file, please copy index.* and pthread-main.js files to your server root dir")
 else()
